@@ -1,0 +1,4 @@
+ipdb==0.12
+pep8==1.7.1
+pytest==4.4.0
+pytest-django==3.4.8
