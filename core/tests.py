@@ -23,10 +23,13 @@ class SolutionTestCase(ModelAPITestCase):
         # assert
         assert_object_created(Solution, response)
 
+
 class AppTestCase(ModelAPITestCase):
     def test_create_app(self):
-        # act
+        # mock
         sln = Solution.objects.create(name='test_solution')
+
+        # act
         response = self.client.post(self.base_uri, {'name': 'test_app', 'solution_id': sln.id}, format='json')
 
         # assert
