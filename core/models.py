@@ -6,7 +6,7 @@ class Solution(models.Model):
     Solution model. This is the main solution to which the platform will serve. (SAGER)
     """
     name = models.CharField(max_length=30)
-    
+
 
 class EntityModel(models.Model):
     """
@@ -15,12 +15,14 @@ class EntityModel(models.Model):
     name = models.CharField(max_length=30)
     solution = models.ForeignKey(Solution, on_delete=None)
 
+
 class App(models.Model):
     """
     app model
     """
     name = models.CharField(max_length=30)
     solution = models.ForeignKey(Solution, on_delete=None)
+
 
 class Field(models.Model):
     """
@@ -29,3 +31,17 @@ class Field(models.Model):
     name = models.CharField(max_length=30)
     typeName = models.CharField(max_length=30)
     entityModel = models.ForeignKey(EntityModel, on_delete=None)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
