@@ -1,4 +1,4 @@
-
+﻿
 # Created by https://www.gitignore.io/api/python
 # Edit at https://www.gitignore.io/?templates=python
 
@@ -126,5 +126,9 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# VSCode
+.vscode
+.pytest_cache/
 
 # End of https://www.gitignore.io/api/python
