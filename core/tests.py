@@ -1,7 +1,7 @@
 import pytest
 
 from core.utils.testing import *
-from core.models import Solution, App
+from core.models import Solution, App, Entity
 
 
 class SolutionTestCase(ModelAPITestCase):
@@ -34,3 +34,15 @@ class AppTestCase(ModelAPITestCase):
 
         # assert
         assert_object_created(App, response)
+
+
+class EntityTestCase(ModelAPITestCase):
+    def test_create_entity_model(self):
+        # mock
+        sln = Solution.objects.create(name='test_solution')
+
+        #act
+        response = self.client.post(self.base_uri, {'name': 'test_entity', 'solution_id': sln.id}, format='json')
+
+        #assert
+        assert_object_created(Entity, response)

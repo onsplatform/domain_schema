@@ -8,7 +8,7 @@ class Solution(models.Model):
     name = models.CharField(max_length=30)
 
 
-class EntityModel(models.Model):
+class Entity(models.Model):
     """
     Entity model. This is the Entity that will be used in the solution. (USINA)
     """
@@ -30,7 +30,7 @@ class Field(models.Model):
     """
     name = models.CharField(max_length=30)
     typeName = models.CharField(max_length=30)
-    entityModel = models.ForeignKey(EntityModel, on_delete=None)
+    entity = models.ForeignKey(Entity, on_delete=None)
 
 
 
