@@ -37,7 +37,7 @@ class AppTestCase(ModelAPITestCase):
 
 
 class EntityTestCase(ModelAPITestCase):
-    def test_create_entity_model(self):
+    def test_create_entity(self):
         # mock
         sln = Solution.objects.create(name='test_solution')
 
@@ -50,7 +50,18 @@ class EntityTestCase(ModelAPITestCase):
         #assert
         assert_object_created(Entity, response)
 
-    def test_get_entity_by_id(self):
+    def test_get_entities(self):
+        # mock
+        solution = Solution.objects.create(name='test_solution')
+        entity = Entity.objects.create(name='test_entity', solution=solution)
+
+        # act
+        response = self.client.get(self.base_uri)
+
+        # assert
+        assert_response_contains_object(solution, response)
+
+    def test_get_entity_by_key(self):
         # mock
         solution = Solution.objects.create(name='test_solution')
         entity = Entity.objects.create(name='test_entity', solution=solution)
