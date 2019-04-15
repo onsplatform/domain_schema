@@ -22,6 +22,7 @@ class AppView(viewsets.ModelViewSet):
     serializer_class = AppSerializer
     queryset = App.objects.all().order_by('name')
 
+
 class EntityView(viewsets.ModelViewSet):
     """
     entity model view

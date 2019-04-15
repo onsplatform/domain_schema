@@ -36,14 +36,18 @@ def assert_object_created(cls, response):
     assert_object_exists(cls)
 
 
-def assert_object_in_response(obj, response, max_count=1, status_code=200):
+def assert_response_contains_object(obj, response, is_array=True, max_count=1, status_code=200):
     """
     asserts a response object contains an existing object.
     """
     json_data = response.json()
     assert_status_code(response, status_code)
-    assert len(json_data) == max_count, ASSERTION_MESSAGES['RESPONSE_LENGTH'] % (max_count, len(json_data))
-    assert obj.id in {d['id'] for d in json_data}, ASSERTION_MESSAGES['OBJECT_IN_RESPONSE'] % obj.id
+
+    if is_array:
+        assert len(json_data) == max_count, ASSERTION_MESSAGES['RESPONSE_LENGTH'] % (max_count, len(json_data))
+        json_data = json_data[0]
+
+    assert obj.id == json_data['id'], ASSERTION_MESSAGES['OBJECT_IN_RESPONSE'] % obj.id
 
 
 @pytest.fixture(scope='class')
