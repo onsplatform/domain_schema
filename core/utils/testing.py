@@ -9,8 +9,14 @@ ASSERTION_MESSAGES = {
     'STATUS_CODE': "expected response code %i but got %i.",
     'OBJECT_EXISTS': 'expected %i existing object but there are %i.',
     'OBJECT_IN_RESPONSE': 'expected object with id %i missing in response.',
-    'RESPONSE_LENGTH': 'expected %i objects in response, but it contains %i',
+    'RESPONSE_LENGTH': 'expected %i objects in response, but it contains %i.',
+    'FIELD_VALUE_EQUALS': 'expected object field %s to be equals to %s, but got %s.',
 }
+
+def assert_field_equality(resource, field_name, expected_value):
+        assert resource.__dict__[field_name] == expected_value, \
+            ASSERTION_MESSAGES['FIELD_VALUE_EQUALS'] % \
+            (field_name, expected_value, resource.__dict__[key])
 
 
 def assert_status_code(response, expected_code):
@@ -74,4 +80,71 @@ def base_uri(request):
 @pytest.mark.usefixtures("base_uri")
 @pytest.mark.usefixtures("api_client")
 class ModelAPITestCase(APITestCase):
-    pass
+    MODEL = None
+    __test__ = False
+
+    def build_requirements(self):
+        return {}
+
+    def build(self):
+        obj_data = self.create_data()
+        obj_data.update(self.build_requirements())
+        return self.MODEL.objects.create(**obj_data)
+
+    def create_data(self):
+        return {}
+
+    def update_data(self):
+        return {}
+
+    def test_get_resources(self):
+        # mock
+        resource = self.build()
+
+        # act
+        response = self.client.get(self.base_uri)
+
+        # assert
+        assert_response_contains_object(resource, response)
+
+    def test_create_resource(self):
+        # mock
+        obj_data = self.create_data()
+
+        obj_data.update({
+            f'{key}_id': val.id for key, val
+            in self.build_requirements().items()
+        })
+
+        # act
+        response = self.client.post(self.base_uri, obj_data, format='json')
+
+        # assert
+        assert_object_created(self.MODEL, response)
+
+    def test_get_resource_by_key(self):
+        resource = self.build()
+
+        # act
+        response = self.client.get(f'{self.base_uri}{resource.id}/')
+
+        # assert
+        assert_response_contains_object(resource, response, is_array=False)
+
+    def test_update_resource(self):
+        # mock
+        resource = self.build()
+        obj_data = self.update_data()
+        obj_data.update({
+            f'{k}_id': v.id for k, v in self.build_requirements().items()
+        })
+
+        # act
+        response = self.client.put(
+            f'{self.base_uri}{resource.id}/', obj_data, format='json')
+
+        # assert
+        updated_resource = self.MODEL.objects.get(pk=resource.id)
+
+        for key, val in self.update_data().items():
+            assert_field_equality(updated_resource, key, val)
