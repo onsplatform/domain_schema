@@ -1,5 +1,7 @@
 from rest_framework import serializers
 
+from drf_writable_nested import WritableNestedModelSerializer
+
 from core.models import Solution, App, Entity, Field
 
 
@@ -31,18 +33,16 @@ class FieldSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Field
-        fields = ('id', 'name', 'field_type',)
+        fields = ('pk', 'name', 'field_type',)
 
 
-class EntitySerializer(serializers.ModelSerializer):
+class EntitySerializer(WritableNestedModelSerializer):
     """
     entity model serializer
     """
     solution_id = serializers.IntegerField(required=True)
-    fields = FieldSerializer(many=True, read_only=True)
+    fields = FieldSerializer(many=True)
 
     class Meta:
         model = Entity
         fields = ('id', 'name', 'solution_id', 'fields', )
-
-

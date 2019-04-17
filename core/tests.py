@@ -41,6 +41,7 @@ class AppTestCase(ModelAPITestCase):
 
 class EntityTestCase(ModelAPITestCase):
     MODEL = Entity
+    NESTED_MODELS = {'fields': Field}
     __test__ = True
 
     def build_requirements(self):
@@ -50,10 +51,18 @@ class EntityTestCase(ModelAPITestCase):
 
     def create_data(self):
         return {
-            'name': 'test_entity'
+            'name': 'test_entity',
+            'fields': [{
+                'name': 'name',
+                'field_type': 'char',
+            }]
         }
 
     def update_data(self):
         return {
-            'name': 'test_entity_upd'
+            'name': 'test_entity_upd',
+            'fields': [{
+                'name': 'name',
+                'field_type': 'char',
+            }]
         }

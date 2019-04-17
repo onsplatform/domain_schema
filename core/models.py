@@ -16,20 +16,20 @@ class Solution(models.Model):
     name = models.CharField(max_length=30)
 
 
-class Entity(models.Model):
-    """
-    Entity model. This is the Entity that will be used in the solution. (USINA)
-    """
-    name = models.CharField(max_length=30)
-    solution = models.ForeignKey(Solution, on_delete=None)
-
-
 class App(models.Model):
     """
     app model
     """
     name = models.CharField(max_length=30)
-    solution = models.ForeignKey(Solution, on_delete=None)
+    solution = models.ForeignKey(Solution, on_delete=None, related_name='apps')
+
+
+class Entity(models.Model):
+    """
+    Entity model. This is the Entity that will be used in the solution. (USINA)
+    """
+    name = models.CharField(max_length=30)
+    solution = models.ForeignKey(Solution, on_delete=None, related_name='entities')
 
 
 class Field(models.Model):
@@ -37,8 +37,7 @@ class Field(models.Model):
     field model
     """
     name = models.CharField(max_length=30)
-    entity = models.ForeignKey(Entity, on_delete=None, related_name='fields')
+    entity = models.ForeignKey(Entity, on_delete=models.CASCADE, related_name='fields')
     field_type = models.CharField(
         max_length=4,
         choices=[(field, field.value) for field in FIELD_TYPES])
-

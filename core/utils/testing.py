@@ -14,9 +14,9 @@ ASSERTION_MESSAGES = {
 }
 
 def assert_field_equality(resource, field_name, expected_value):
-        assert resource.__dict__[field_name] == expected_value, \
-            ASSERTION_MESSAGES['FIELD_VALUE_EQUALS'] % \
-            (field_name, expected_value, resource.__dict__[key])
+    assert resource.__dict__[field_name] == expected_value, \
+        ASSERTION_MESSAGES['FIELD_VALUE_EQUALS'] % \
+        (field_name, expected_value, resource.__dict__[field_name])
 
 
 def assert_status_code(response, expected_code):
@@ -81,20 +81,60 @@ def base_uri(request):
 @pytest.mark.usefixtures("api_client")
 class ModelAPITestCase(APITestCase):
     MODEL = None
+    NESTED_MODELS = {}
     __test__ = False
 
     def build_requirements(self):
+        """when overriden create all the necessary requirements
+           to allow us to create a new entity under test.
+
+        :returns: dict
+        """
         return {}
 
+    def build_nested(self, model):
+        """builds and loads nested objects in the entity under test.
+        """
+        for name, _type in self.NESTED_MODELS.items():
+            nested_attr = getattr(model, name, None)
+
+            if not nested_attr:
+                continue
+
+            data = self.create_data()
+            entities = [_type(**v) for v in data[name]]
+            nested_attr.set(entities, bulk=False)
+
     def build(self):
-        obj_data = self.create_data()
-        obj_data.update(self.build_requirements())
-        return self.MODEL.objects.create(**obj_data)
+        """builds the entity under test.
+
+        :returns: MODEL instance.
+        """
+        data = {**self.create_data(), **self.build_requirements()}
+        model = self.MODEL()
+
+        for key, val in data.items():
+            if key not in self.NESTED_MODELS:
+                setattr(model, key, val)
+
+        model.save()
+        self.build_nested(model)
+        return model
 
     def create_data(self):
+        """must be overiden with the desired data which will be sent
+           in the body of the http request to test creating an entity.
+
+           :return dict.
+        """
         return {}
 
     def update_data(self):
+        """must be overiden with the desired data which will be sent
+           in the body of the http request to test updating an entity.
+
+           :return dict.
+        """
         return {}
 
     def test_get_resources(self):
@@ -123,6 +163,7 @@ class ModelAPITestCase(APITestCase):
         assert_object_created(self.MODEL, response)
 
     def test_get_resource_by_key(self):
+        # mock
         resource = self.build()
 
         # act
@@ -147,4 +188,7 @@ class ModelAPITestCase(APITestCase):
         updated_resource = self.MODEL.objects.get(pk=resource.id)
 
         for key, val in self.update_data().items():
-            assert_field_equality(updated_resource, key, val)
+            if key not in self.NESTED_MODELS:
+                assert_field_equality(updated_resource, key, val)
+
+
