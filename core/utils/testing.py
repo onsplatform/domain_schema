@@ -122,7 +122,7 @@ class ModelAPITestCase(APITestCase):
         return model
 
     def create_data(self):
-        """must be overiden with the desired data which will be sent
+        """must be overridden with the desired data which will be sent
            in the body of the http request to test creating an entity.
 
            :return dict.
@@ -130,7 +130,7 @@ class ModelAPITestCase(APITestCase):
         return {}
 
     def update_data(self):
-        """must be overiden with the desired data which will be sent
+        """must be overridden with the desired data which will be sent
            in the body of the http request to test updating an entity.
 
            :return dict.
