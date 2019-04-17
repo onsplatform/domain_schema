@@ -85,7 +85,7 @@ class ModelAPITestCase(APITestCase):
     __test__ = False
 
     def build_requirements(self):
-        """when overriden create all the necessary requirements
+        """when overriden creates all the necessary requirements
            to allow us to create a new entity under test.
 
         :returns: dict
