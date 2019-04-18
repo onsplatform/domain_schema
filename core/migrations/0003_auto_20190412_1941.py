@@ -2,7 +2,6 @@
 
 from django.db import migrations
 
-
 class Migration(migrations.Migration):
     """
      Non-Atomic is necessary here. Renaming the 'core_entitymodel' table while in a transaction 
