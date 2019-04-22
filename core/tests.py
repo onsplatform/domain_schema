@@ -6,68 +6,68 @@ from core.models import Solution, App, Entity, \
         Field, EntityMap, MappedField, FIELD_TYPES
 
 
-# class SolutionTestCase(ModelAPITestCase):
-#     MODEL = Solution
-#     __test__ = True
+class SolutionTestCase(ModelAPITestCase):
+    MODEL = Solution
+    __test__ = True
 
-#     def update_data(self):
-#         return {
-#             'name': 'test_solution_upd'
-#         }
+    def update_data(self):
+        return {
+            'name': 'test_solution_upd'
+        }
 
-#     def create_data(self):
-#         return {
-#             'name': 'test_solution'
-#         }
-
-
-# class AppTestCase(ModelAPITestCase):
-#     MODEL = App
-#     __test__ = True
-
-#     def build_requirements(self):
-#         return {
-#             'solution': Solution.objects.create(name='test_solution')
-#         }
-
-#     def create_data(self):
-#         return {
-#             'name': 'test_app'
-#         }
-
-#     def update_data(self):
-#         return {
-#             'name': 'test_app_upd'
-#         }
+    def create_data(self):
+        return {
+            'name': 'test_solution'
+        }
 
 
-# class EntityTestCase(ModelAPITestCase):
-#     MODEL = Entity
-#     NESTED_MODELS = {'fields': Field}
-#     __test__ = True
+class AppTestCase(ModelAPITestCase):
+    MODEL = App
+    __test__ = True
 
-#     def build_requirements(self):
-#         return {
-#             'solution': Solution.objects.create(name='test_solution')
-#         }
+    def build_requirements(self):
+        return {
+            'solution': Solution.objects.create(name='test_solution')
+        }
 
-#     def create_data(self):
-#         return {
-#             'name': 'test_entity',
-#             'fields': [{
-#                 'name': 'name',
-#                 'field_type': 'char',
-#             }]
-#         }
+    def create_data(self):
+        return {
+            'name': 'test_app'
+        }
 
-#     def update_data(self):
-#         return {
-#             'name': 'test_entity_upd',
-#             'fields': [{
-#                 'name': 'name',
-#                 'field_type': 'char',
-#             }]
-#         }
+    def update_data(self):
+        return {
+            'name': 'test_app_upd'
+        }
+
+
+class EntityTestCase(ModelAPITestCase):
+    MODEL = Entity
+    NESTED_MODELS = {'fields': Field}
+    __test__ = True
+
+    def build_requirements(self):
+        return {
+            'solution': Solution.objects.create(name='test_solution')
+        }
+
+    def create_data(self):
+        return {
+            'name': 'test_entity',
+            'fields': [{
+                'name': 'name',
+                'field_type': 'char',
+            }]
+        }
+
+    def update_data(self):
+        return {
+            'name': 'test_entity_upd',
+            'fields': [{
+                'name': 'name',
+                'field_type': 'char',
+            }]
+        }
 
 class EntityMapTestCase(ModelAPITestCase):
     MODEL = EntityMap
