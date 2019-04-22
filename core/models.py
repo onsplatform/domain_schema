@@ -8,6 +8,9 @@ class FIELD_TYPES(Enum):   # A subclass of Enum
     INTEGER = 'int'
     DECIMAL = 'dec'
 
+    def __str__(self):
+        return self.value
+
 
 class Solution(models.Model):
     """

@@ -1,7 +1,7 @@
 from rest_framework import viewsets
 
-from core.models import Solution, App, Entity
-from core.serializers import SolutionSerializer, AppSerializer, EntitySerializer
+from core.models import Solution, App, Entity, EntityMap
+from core.serializers import SolutionSerializer, AppSerializer, EntitySerializer, EntityMapSerializer
 
 
 __all__ = ['SolutionView', 'AppView', 'EntityView' ]
@@ -29,3 +29,11 @@ class EntityView(viewsets.ModelViewSet):
     """
     serializer_class = EntitySerializer
     queryset = Entity.objects.all().order_by('name')
+
+
+class EntityMapView(viewsets.ModelViewSet):
+    """
+    entity model view
+    """
+    serializer_class = EntityMapSerializer
+    queryset = EntityMap.objects.all().order_by('name')
