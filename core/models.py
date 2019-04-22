@@ -50,6 +50,7 @@ class EntityMap(models.Model):
     """
     app = models.ForeignKey(App, on_delete=models.CASCADE, related_name='maps')
     entity = models.ForeignKey(Entity, on_delete=models.CASCADE, related_name='maps')
+    name = models.CharField(max_length=30)
 
 
 class MappedField(models.Model):

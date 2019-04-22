@@ -2,7 +2,7 @@ from rest_framework import serializers
 
 from drf_writable_nested import WritableNestedModelSerializer
 
-from core.models import Solution, App, Entity, Field
+from core.models import Solution, App, Entity, Field, EntityMap
 
 
 class SolutionSerializer(serializers.ModelSerializer):
@@ -46,3 +46,11 @@ class EntitySerializer(WritableNestedModelSerializer):
     class Meta:
         model = Entity
         fields = ('id', 'name', 'solution_id', 'fields', )
+
+
+class MapSerializer(serializers.ModelSerializer):
+    app_id = serializers.IntegerField(required=True)
+
+    class Meta:
+        model = EntityMap
+        fields = ('id', 'app_id', 'fields', )
