@@ -31,13 +31,13 @@ class RemoteMap:
 
 if __name__ == "__main__":
     # this would come from domain schema.
-    remote_map = RemoteMap('Person', 'tb_1', [
+    person_map = RemoteMap('Person', 'tb_1', [
         RemoteField('name', str, 'c1'),
         RemoteField('age', int, 'c2')
     ])
 
     # build a dynamic pony class from remote map.
-    dyn_mapping = remote_map.build()
+    Person = person_map.build()
 
     # registering map in pony
     db.bind(provider='sqlite', filename='database.sqlite', create_db=True)
@@ -45,13 +45,14 @@ if __name__ == "__main__":
 
     # querying data
     with orm.db_session():
+        person = Person(name='Foo', age=23)
         # create entity
         # d1 = dyn_mapping(name='Foo', age='10')
-        # orm.commit()
+        orm.commit()
 
         # query entities
-        dynamics = orm.select(d for d in dyn_mapping)
+        people = orm.select(d for d in Person)
 
-        for d in dynamics:
-            print(d.name, d.age)
+        for p in people:
+            print(p.name, p.age)
 

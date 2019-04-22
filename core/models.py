@@ -21,15 +21,16 @@ class App(models.Model):
     app model
     """
     name = models.CharField(max_length=30)
-    solution = models.ForeignKey(Solution, on_delete=None, related_name='apps')
+    solution = models.ForeignKey(Solution, on_delete=models.CASCADE, related_name='apps')
 
 
 class Entity(models.Model):
     """
     Entity model. This is the Entity that will be used in the solution. (USINA)
     """
+    solution = models.ForeignKey(Solution, on_delete=models.CASCADE, related_name='entities')
     name = models.CharField(max_length=30)
-    solution = models.ForeignKey(Solution, on_delete=None, related_name='entities')
+    table = models.CharField(max_length=30)
 
 
 class Field(models.Model):
@@ -41,3 +42,20 @@ class Field(models.Model):
     field_type = models.CharField(
         max_length=4,
         choices=[(field, field.value) for field in FIELD_TYPES])
+
+
+class EntityMap(models.Model):
+    """
+    Map model
+    """
+    app = models.ForeignKey(App, on_delete=models.CASCADE, related_name='maps')
+    entity = models.ForeignKey(Entity, on_delete=models.CASCADE, related_name='maps')
+
+
+class MappedField(models.Model):
+    """
+    Mapped field model
+    """
+    entity_map = models.ForeignKey(EntityMap, on_delete=models.CASCADE, related_name='fields')
+    field = models.ForeignKey(Field, on_delete=models.CASCADE, related_name='mappings')
+    alias = models.CharField(max_length=30)
