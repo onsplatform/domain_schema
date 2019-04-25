@@ -3,6 +3,8 @@ from rest_framework import serializers
 from drf_writable_nested import WritableNestedModelSerializer
 
 from core import models
+from core import queue
+from external import migration
 
 
 class SolutionSerializer(serializers.ModelSerializer):
@@ -46,6 +48,11 @@ class EntitySerializer(WritableNestedModelSerializer):
     class Meta:
         model = models.Entity
         fields = ('id', 'name', 'solution_id', 'fields', )
+
+    def save(self, **kwargs):
+        instance = super(WritableNestedModelSerializer, self).save(**kwargs)
+        migration.migrate(instance)
+        return instance
 
 
 class MappedFieldSerializer(serializers.ModelSerializer):

@@ -1,4 +1,5 @@
 from enum import Enum
+
 from django.db import models
 
 
@@ -34,6 +35,7 @@ class Entity(models.Model):
     solution = models.ForeignKey(Solution, on_delete=models.CASCADE, related_name='entities')
     name = models.CharField(max_length=30)
     table = models.CharField(max_length=30)
+    migration = models.UUIDField(null=True)
 
 
 class Field(models.Model):
@@ -42,10 +44,10 @@ class Field(models.Model):
     """
     name = models.CharField(max_length=30)
     entity = models.ForeignKey(Entity, on_delete=models.CASCADE, related_name='fields')
+    migration = models.UUIDField(null=True)
     field_type = models.CharField(
         max_length=4,
         choices=[(field, field.value) for field in FIELD_TYPES])
-
 
 class EntityMap(models.Model):
     """

@@ -4,7 +4,7 @@ from core.models import Solution, App, Entity, EntityMap
 from core.serializers import SolutionSerializer, AppSerializer, EntitySerializer, EntityMapSerializer
 
 
-__all__ = ['SolutionView', 'AppView', 'EntityView' ]
+__all__ = ['SolutionView', 'AppView', 'EntityView', 'EntityMapView', ]
 
 
 class SolutionView(viewsets.ModelViewSet):
