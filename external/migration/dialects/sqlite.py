@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from ..commands import BaseCreateTableCommand, BaseRenameTableCommand
+from ..commands import BaseCreateTableCommand, BaseRenameTableCommand, BaseAlterTableCommand
 
 
 CONSTRAINTS = {
@@ -13,17 +13,17 @@ class SQLiteCreateTableCommand(BaseCreateTableCommand):
     CONSTRAINTS = CONSTRAINTS
 
     def _build_column(self, name, _type, constraints):
-        return  f'{name} {_type} {str.join(", ", constraints)}'
+        return  f'{name} {_type} {str.join(", ", constraints)}'.strip()
 
     def build_command(self):
         return f'CREATE TABLE {self.table_name}'
 
 
-class SQLiteAlterTableCommand(BaseCreateTableCommand):
+class SQLiteAlterTableCommand(BaseAlterTableCommand):
     CONSTRAINTS = CONSTRAINTS
 
     def _build_column(self, name, _type, constraints):
-        return  f'{name} {_type} {str.join(", ", constraints)}'
+        return  f'ADD {name} {_type} {str.join(", ", constraints)}'.strip()
 
     def build_command(self):
         return f'ALTER TABLE {self.table_name}'
@@ -34,12 +34,8 @@ class SQLiteRenameTableCommand(BaseRenameTableCommand):
         return f'ALTER TABLE {self.table_name} RENAME TO {self.name}'
 
 
-class SQLiteMigrationDialect:
-    def create_table(self, table_name):
-        return SQLiteCreateTableCommand(table_name)
-
-    def alter_table(self, table_name):
-        return SQLiteAlterTableCommand(table_name)
-
-    def rename_table(self, table_name):
-        return SQLiteRenameTableCommand(table_name)
+SQLiteMigrationDialect = {
+    'create_table': SQLiteCreateTableCommand,
+    'alter_table': SQLiteAlterTableCommand,
+    'rename_table': SQLiteRenameTableCommand,
+}
