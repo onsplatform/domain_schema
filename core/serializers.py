@@ -51,7 +51,7 @@ class EntitySerializer(WritableNestedModelSerializer):
 
     def save(self, **kwargs):
         instance = super(WritableNestedModelSerializer, self).save(**kwargs)
-        migration.migrate(instance)
+        # migration.migrate(instance)
         return instance
 
 
