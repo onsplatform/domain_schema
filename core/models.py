@@ -1,3 +1,4 @@
+import uuid
 from enum import Enum
 
 from django.db import models
@@ -28,14 +29,22 @@ class App(models.Model):
     solution = models.ForeignKey(Solution, on_delete=models.CASCADE, related_name='apps')
 
 
+class Migration(models.Model):
+    """
+    Domain migration
+    """
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    date_created = models.DateTimeField(auto_now=True)
+
+
 class Entity(models.Model):
     """
     Entity model. This is the Entity that will be used in the solution. (USINA)
     """
     solution = models.ForeignKey(Solution, on_delete=models.CASCADE, related_name='entities')
+    migration = models.OneToOneField(Migration, on_delete=models.CASCADE, related_name='entity')
     name = models.CharField(max_length=30)
     table = models.CharField(max_length=30)
-    migration = models.UUIDField(null=True)
 
 
 class Field(models.Model):
@@ -44,6 +53,7 @@ class Field(models.Model):
     """
     name = models.CharField(max_length=30)
     entity = models.ForeignKey(Entity, on_delete=models.CASCADE, related_name='fields')
+    migration = models.ForeignKey(Migration, on_delete=models.CASCADE, related_name='fields')
     migration = models.UUIDField(null=True)
     field_type = models.CharField(
         max_length=4,
@@ -65,3 +75,6 @@ class MappedField(models.Model):
     entity_map = models.ForeignKey(EntityMap, on_delete=models.CASCADE, related_name='fields')
     field = models.ForeignKey(Field, on_delete=models.CASCADE, related_name='mappings')
     alias = models.CharField(max_length=30)
+
+
+
