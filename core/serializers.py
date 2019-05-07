@@ -50,7 +50,7 @@ class EntitySerializer(WritableNestedModelSerializer):
         fields = ('id', 'name', 'solution_id', 'fields', )
 
     def save(self, **kwargs):
-        return super(WritableNestedModelSerializer, self).save(
+        return super(EntitySerializer, self).save(
             migration=models.Migration.objects.create(),
             **kwargs)
 
