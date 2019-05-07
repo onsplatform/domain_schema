@@ -18,7 +18,7 @@ class ModelAPICreateTestMixin:
 
         obj_data.update({
             f'{key}_id': val.id for key, val
-            in self.build_requirements().items()
+            in self.requirements.items()
         })
 
         # act
@@ -42,10 +42,11 @@ class ModelAPIUpdateTestMixin:
     def test_update_resource(self):
         # mock
         resource = self.build()
-        obj_data = self.update_data()
-        obj_data.update({
-            f'{k}_id': v.id for k, v in self.build_requirements().items()
-        })
+        update_data = self.update_data()
+        obj_data = {
+            **update_data,
+            **{f'{k}_id': v.id for k, v in self.requirements.items()}
+        }
 
         # act
         response = self.client.put(
@@ -54,7 +55,7 @@ class ModelAPIUpdateTestMixin:
         # assert
         updated_resource = self.MODEL.objects.get(pk=resource.id)
 
-        for key, val in self.update_data().items():
+        for key, val in update_data.items():
             if key not in self.NESTED_MODELS:
                 assert_field_equality(updated_resource, key, val)
 

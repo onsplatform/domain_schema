@@ -2,7 +2,7 @@ import pytest
 
 from core.utils.testing import *
 
-from core.models import Solution, App, Entity, \
+from core.models import Solution, App, Migration, Entity, \
         Field, EntityMap, MappedField, FIELD_TYPES
 
 
@@ -48,7 +48,8 @@ class EntityTestCase(ModelAPITestCase):
 
     def build_requirements(self):
         return {
-            'solution': Solution.objects.create(name='test_solution')
+            'solution': Solution.objects.create(name='test_solution'),
+            'migration': Migration.objects.create(),
         }
 
     def create_data(self):
@@ -71,24 +72,28 @@ class EntityTestCase(ModelAPITestCase):
 
 class EntityMapTestCase(ModelAPITestCase):
     MODEL = EntityMap
-    NESTED_MODELS = {'fields': MappedField}
+    NESTED_MODELS = {
+        'fields': MappedField,
+    }
     __test__ = True
 
     def build_requirements(self):
         sln = Solution.objects.create(name='test_solution')
         app = App.objects.create(name='test_app', solution=sln)
-        entity = Entity.objects.create(name='test_entity', solution=sln, table='tb_test_entity')
+        migration = Migration.objects.create()
+        entity = Entity.objects.create(
+            name='test_entity', solution=sln, migration=migration, table='tb_test_entity')
 
         return {
-            'solution': sln,
-            'app': app,
             'entity': entity,
+            'app': app,
         }
 
     def create_data(self):
-        sln = Solution.objects.create(name='test_solution')
-        entity = Entity.objects.create(name='test_entity', solution=sln, table='tb_test_entity')
-        field  = Field.objects.create(entity=entity, name='test_field', field_type=FIELD_TYPES.INTEGER)
+        field  = Field.objects.create(
+            entity=self.requirements['entity'],
+            name='test_field',
+            field_type=FIELD_TYPES.INTEGER)
 
         return {
             'name': 'test_map',
@@ -99,9 +104,10 @@ class EntityMapTestCase(ModelAPITestCase):
         }
 
     def update_data(self):
-        sln = Solution.objects.create(name='test_solution')
-        entity = Entity.objects.create(name='test_entity', solution=sln, table='tb_test_entity')
-        field  = Field.objects.create(entity=entity, name='test_field', field_type=FIELD_TYPES.INTEGER)
+        field  = Field.objects.create(
+            entity=self.requirements['entity'],
+            name='test_field',
+            field_type=FIELD_TYPES.INTEGER)
 
         return {
             'name': 'test_map_upd',
