@@ -1,7 +1,6 @@
 import pytest
 
 from core.utils.testing import *
-
 from core.models import Solution, App, Migration, Entity, \
         Field, EntityMap, MappedField, FIELD_TYPES
 
@@ -49,7 +48,6 @@ class EntityTestCase(ModelAPITestCase):
     def build_requirements(self):
         return {
             'solution': Solution.objects.create(name='test_solution'),
-            'migration': Migration.objects.create(),
         }
 
     def create_data(self):
@@ -80,9 +78,8 @@ class EntityMapTestCase(ModelAPITestCase):
     def build_requirements(self):
         sln = Solution.objects.create(name='test_solution')
         app = App.objects.create(name='test_app', solution=sln)
-        migration = Migration.objects.create()
         entity = Entity.objects.create(
-            name='test_entity', solution=sln, migration=migration, table='tb_test_entity')
+            name='test_entity', solution=sln, table='tb_test_entity')
 
         return {
             'entity': entity,

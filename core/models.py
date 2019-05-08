@@ -43,8 +43,18 @@ class Entity(models.Model):
     """
     solution = models.ForeignKey(Solution, on_delete=models.CASCADE, related_name='entities')
     migration = models.OneToOneField(Migration, on_delete=models.CASCADE, related_name='entity')
+    last_migration = models.OneToOneField(Migration, on_delete=models.CASCADE, related_name='+')
     name = models.CharField(max_length=30)
     table = models.CharField(max_length=30)
+
+
+    def save(self, *args, **kwargs):
+        self.last_migration = Migration.objects.create()
+
+        if not self.id:
+            self.migration = self.last_migration
+
+        super(Entity, self).save(*args, **kwargs)
 
 
 class Field(models.Model):
@@ -54,10 +64,14 @@ class Field(models.Model):
     name = models.CharField(max_length=30)
     entity = models.ForeignKey(Entity, on_delete=models.CASCADE, related_name='fields')
     migration = models.ForeignKey(Migration, on_delete=models.CASCADE, related_name='fields')
-    migration = models.UUIDField(null=True)
     field_type = models.CharField(
         max_length=4,
         choices=[(field, field.value) for field in FIELD_TYPES])
+
+    def save(self, *args, **kwargs):
+        self.migration = self.entity.last_migration
+        super(Field, self).save(*args, **kwargs)
+
 
 class EntityMap(models.Model):
     """
