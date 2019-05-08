@@ -2,6 +2,9 @@ import uuid
 from enum import Enum
 
 from django.db import models
+from django.conf import settings
+
+from external.migration import DatabaseMigration
 
 
 class FIELD_TYPES(Enum):   # A subclass of Enum
@@ -29,32 +32,49 @@ class App(models.Model):
     solution = models.ForeignKey(Solution, on_delete=models.CASCADE, related_name='apps')
 
 
+class Entity(models.Model):
+    """
+    Entity model. This is the Entity that will be used in the solution. (USINA)
+    """
+    solution = models.ForeignKey(Solution, on_delete=models.CASCADE, related_name='entities')
+    name = models.CharField(max_length=30)
+    table = models.CharField(max_length=30)
+
+    def make_migration(self):
+        first = not self.migrations.exists()
+        migration = Migration.objects.create(entity=self, first=first)
+        self.fields.filter(migration__isnull=True)\
+            .update(migration=migration)
+        return migration
+
+
 class Migration(models.Model):
     """
     Domain migration
     """
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     date_created = models.DateTimeField(auto_now=True)
+    entity = models.ForeignKey(Entity, on_delete=models.CASCADE, related_name='migrations')
+    first = models.BooleanField(default=False)
 
+    def create_table(self):
+        db_migration = DatabaseMigration(settings.MIGRATION_DIALECT)
+        table = db_migration.create_table(self.entity.table) \
+                    .with_column('id', FIELD_TYPES.INTEGER, primary_key=True)
 
-class Entity(models.Model):
-    """
-    Entity model. This is the Entity that will be used in the solution. (USINA)
-    """
-    solution = models.ForeignKey(Solution, on_delete=models.CASCADE, related_name='entities')
-    migration = models.OneToOneField(Migration, on_delete=models.CASCADE, related_name='entity')
-    last_migration = models.OneToOneField(Migration, on_delete=models.CASCADE, related_name='+')
-    name = models.CharField(max_length=30)
-    table = models.CharField(max_length=30)
+        for field in self.fields.all():
+            table = table.with_column(field.name, field.field_type)
 
+        return table
 
-    def save(self, *args, **kwargs):
-        self.last_migration = Migration.objects.create()
+    def alter_table(self):
+        db_migration = DatabaseMigration(settings.MIGRATION_DIALECT)
+        table = db_migration.alter_table(self.entity.table)
 
-        if not self.id:
-            self.migration = self.last_migration
+        for field in self.fields.all():
+            table = table.add_column(field.name, field.field_type)
 
-        super(Entity, self).save(*args, **kwargs)
+        return table
 
 
 class Field(models.Model):
@@ -63,14 +83,14 @@ class Field(models.Model):
     """
     name = models.CharField(max_length=30)
     entity = models.ForeignKey(Entity, on_delete=models.CASCADE, related_name='fields')
-    migration = models.ForeignKey(Migration, on_delete=models.CASCADE, related_name='fields')
+    migration = models.ForeignKey(Migration, on_delete=models.CASCADE, related_name='fields', null=True)
     field_type = models.CharField(
         max_length=4,
         choices=[(field, field.value) for field in FIELD_TYPES])
 
-    def save(self, *args, **kwargs):
-        self.migration = self.entity.last_migration
-        super(Field, self).save(*args, **kwargs)
+    # def save(self, *args, **kwargs):
+    #     self.migration = self.entity.last_migration
+    #     super(Field, self).save(*args, **kwargs)
 
 
 class EntityMap(models.Model):
