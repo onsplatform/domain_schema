@@ -1,4 +1,5 @@
 from django.test import TestCase
+from datetime import datetime
 
 
 from core.utils.testing import *
@@ -15,13 +16,9 @@ class MigrationTestCase(TestCase):
 
         # act
         migration = entity.make_migration()
-        # migrate_command = migration.create_table()
 
         # assert
         assert migration.first == True
-        # assert migrate_command.__class__.__name__.endswith('CreateTableCommand')
-        # assert migrate_command.table_name == 'tb_test'
-        # assert field.name in migrate_command.columns
 
     def test_alter_table(self):
         # mock
@@ -29,19 +26,27 @@ class MigrationTestCase(TestCase):
         entity = Entity.objects.create(solution=solution, name='TestEntity', table='tb_test')
         migration = Migration.objects.create(entity=entity) # pre exisiting migration
 
-        # adding new field to entity.
         field = Field(name='test_field', field_type=FIELD_TYPES.CHAR)
         entity.fields.add(field, bulk=False)
 
         # act
         migration = entity.make_migration()
-        # create_table_command = migration.alter_table()
 
         # assert
         assert not migration.first
-        # assert create_table_command.__class__.__name__.endswith('AlterTableCommand')
-        # assert create_table_command.table_name == 'tb_test'
-        # assert 'test_field' in create_table_command.add_columns
+
+    def test_run_migration(self):
+        # mock
+        solution = Solution.objects.create(name='TestSolution')
+        entity = Entity.objects.create(solution=solution, name='TestEntity', table='tb_test')
+        field = Field.objects.create(entity=entity, field_type=FIELD_TYPES.CHAR, name='test_field')
+        migration = Migration.objects.create(entity=entity) # pre exisiting migration
+
+        # act
+        exectuted_migration = migration.run()
+
+        # assert
+        assert migration.date_executed <= datetime.now()
 
 
 class SolutionTestCase(ModelAPITestCase):

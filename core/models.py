@@ -1,4 +1,5 @@
 import uuid
+from datetime import datetime
 from enum import Enum
 
 from django.db import models
@@ -54,10 +55,11 @@ class Migration(models.Model):
     """
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     date_created = models.DateTimeField(auto_now=True)
+    date_executed = models.DateTimeField(null=True)
     entity = models.ForeignKey(Entity, on_delete=models.CASCADE, related_name='migrations')
     first = models.BooleanField(default=False)
 
-    def create_table(self):
+    def _create_table(self):
         db_migration = DatabaseMigration(settings.MIGRATION_DIALECT)
         table = db_migration.create_table(self.entity.table) \
                     .with_column('id', FIELD_TYPES.INTEGER, primary_key=True)
@@ -67,7 +69,7 @@ class Migration(models.Model):
 
         return table
 
-    def alter_table(self):
+    def _alter_table(self):
         db_migration = DatabaseMigration(settings.MIGRATION_DIALECT)
         table = db_migration.alter_table(self.entity.table)
 
@@ -76,6 +78,18 @@ class Migration(models.Model):
 
         return table
 
+    def run(self):
+        """apply current migration
+
+        :arg1: TODO
+        :returns: TODO
+
+        """
+        command = (self._create_table if self.first else self._alter_table)()
+        command = command.build()
+
+        self.date_executed = datetime.now()
+        self.save()
 
 class Field(models.Model):
     """
@@ -87,10 +101,6 @@ class Field(models.Model):
     field_type = models.CharField(
         max_length=4,
         choices=[(field, field.value) for field in FIELD_TYPES])
-
-    # def save(self, *args, **kwargs):
-    #     self.migration = self.entity.last_migration
-    #     super(Field, self).save(*args, **kwargs)
 
 
 class EntityMap(models.Model):
