@@ -12,6 +12,7 @@ pytest-django = "*"
 djangorestframework = "==3.9.2"
 drf-writable-nested = "==0.5.1"
 Django = "==2.2"
+psycopg2-binary = "*"
 
 [requires]
 python_version = "3.7"
