@@ -2,7 +2,7 @@ import uuid
 from datetime import datetime
 from enum import Enum
 
-from django.db import models
+from django.db import models, transaction
 from django.conf import settings
 
 from external.migration import DatabaseMigration
@@ -43,10 +43,17 @@ class Entity(models.Model):
 
     def make_migration(self):
         first = not self.migrations.exists()
-        migration = Migration.objects.create(entity=self, first=first)
-        self.fields.filter(migration__isnull=True)\
-            .update(migration=migration)
-        return migration
+        fields = self.fields.filter(migration__isnull=True)
+
+        if fields.exists():
+            migration = Migration.objects.create(entity=self, first=first)
+            fields.update(migration=migration)
+            return migration
+
+    def save(self, *args, **kwargs):
+        with transaction.atomic():
+            super(Entity, self).save(*args, **kwargs)
+            Field.objects.create(entity=self, name='id', field_type=FIELD_TYPES.INTEGER)
 
 
 class Migration(models.Model):
@@ -62,7 +69,7 @@ class Migration(models.Model):
     def _create_table(self):
         db_migration = DatabaseMigration(settings.MIGRATION_DIALECT)
         table = db_migration.create_table(self.entity.table) \
-                    .with_column('id', FIELD_TYPES.INTEGER, primary_key=True)
+            .with_column('id', FIELD_TYPES.INTEGER, primary_key=True)
 
         for field in self.fields.all():
             table = table.with_column(field.name, field.field_type)
@@ -85,11 +92,17 @@ class Migration(models.Model):
         :returns: TODO
 
         """
-        command = (self._create_table if self.first else self._alter_table)()
-        command = command.build()
+        command = self._create_table if self.first else self._alter_table
+        command = command().build()
+
+        # TODO: refactor
+        from django.db import connection
+        with connection.cursor() as cursor:
+            cursor.execute(command)
 
         self.date_executed = datetime.now()
         self.save()
+
 
 class Field(models.Model):
     """
@@ -119,6 +132,4 @@ class MappedField(models.Model):
     entity_map = models.ForeignKey(EntityMap, on_delete=models.CASCADE, related_name='fields')
     field = models.ForeignKey(Field, on_delete=models.CASCADE, related_name='mappings')
     alias = models.CharField(max_length=30)
-
-
 

@@ -1,5 +1,8 @@
 import os
-from external.migration.dialects.sqlite import SQLiteMigrationDialect
+
+from external.migration.dialects.postgres import \
+        PostgresMigrationDialect as MigrationDialect
+
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -88,4 +91,4 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
-MIGRATION_DIALECT = SQLiteMigrationDialect
+MIGRATION_DIALECT = MigrationDialect

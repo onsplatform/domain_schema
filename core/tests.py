@@ -1,33 +1,32 @@
-from django.test import TestCase
 from datetime import datetime
 
+from django.test import TestCase
 
 from core.utils.testing import *
 from core.models import Solution, App, Migration, Entity, \
         Field, EntityMap, MappedField, FIELD_TYPES
 
 
-class MigrationTestCase(TestCase):
-    def test_create_table(self):
+class EntityModelTestCase(TestCase):
+    def test_create_first_migration(self):
         # mock
         solution = Solution.objects.create(name='TestSolution')
         entity = Entity.objects.create(solution=solution, name='TestEntity', table='tb_test')
-        field = Field.objects.create(entity=entity, field_type=FIELD_TYPES.CHAR, name='test_field')
+        field = Field.objects.create(entity=entity, name='test_field', field_type=FIELD_TYPES.CHAR)
 
         # act
         migration = entity.make_migration()
 
         # assert
-        assert migration.first == True
+        assert entity.migrations.count() == 1
+        assert migration.first
 
-    def test_alter_table(self):
+    def test_create_next_migration(self):
         # mock
         solution = Solution.objects.create(name='TestSolution')
         entity = Entity.objects.create(solution=solution, name='TestEntity', table='tb_test')
         migration = Migration.objects.create(entity=entity) # pre exisiting migration
-
-        field = Field(name='test_field', field_type=FIELD_TYPES.CHAR)
-        entity.fields.add(field, bulk=False)
+        field = Field.objects.create(entity=entity, name='test_field', field_type=FIELD_TYPES.CHAR)
 
         # act
         migration = entity.make_migration()
@@ -35,12 +34,14 @@ class MigrationTestCase(TestCase):
         # assert
         assert not migration.first
 
+
+class MigrationModelTestCase(TestCase):
     def test_run_migration(self):
         # mock
         solution = Solution.objects.create(name='TestSolution')
         entity = Entity.objects.create(solution=solution, name='TestEntity', table='tb_test')
-        field = Field.objects.create(entity=entity, field_type=FIELD_TYPES.CHAR, name='test_field')
-        migration = Migration.objects.create(entity=entity) # pre exisiting migration
+        migration = Migration.objects.create(entity=entity, first=True) # pre exisiting migration
+        migration.fields.add(entity.fields.first())
 
         # act
         exectuted_migration = migration.run()
@@ -97,6 +98,7 @@ class EntityTestCase(ModelAPITestCase):
     def create_data(self):
         return {
             'name': 'test_entity',
+            'table': 'test_table',
             'fields': [{
                 'name': 'name',
                 'field_type': 'char',
@@ -106,11 +108,13 @@ class EntityTestCase(ModelAPITestCase):
     def update_data(self):
         return {
             'name': 'test_entity_upd',
+            'table': 'test_table',
             'fields': [{
                 'name': 'name',
                 'field_type': 'char',
             }]
         }
+
 
 class EntityMapTestCase(ModelAPITestCase):
     MODEL = EntityMap
@@ -157,4 +161,3 @@ class EntityMapTestCase(ModelAPITestCase):
                 'alias': 'test_alias',
             }]
         }
-

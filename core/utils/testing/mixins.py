@@ -27,6 +27,18 @@ class ModelAPICreateTestMixin:
         # assert
         assert_object_created(self.MODEL, response)
 
+        # load created entity
+        entity = self.MODEL.objects.get(pk=response.json()['id'])
+
+        # let the user create it's own assertions
+        self.assert_after_create(entity)
+
+    def assert_after_create(self, entity):
+        """when overridden allows user to make custom assertions.
+           runs after the entity is persisted in the database.
+        """
+        pass
+
 
 class ModelAPIUpdateTestMixin:
     """Test mixing for model updating endpoints. """
