@@ -43,7 +43,7 @@ class EntitySerializer(WritableNestedModelSerializer):
     entity model serializer
     """
     solution_id = serializers.IntegerField(required=True)
-    fields = FieldSerializer(many=True)
+    fields = FieldSerializer(many=True, required=False)
 
     class Meta:
         model = models.Entity

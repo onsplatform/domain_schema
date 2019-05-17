@@ -19,6 +19,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django_celery_results',
     'rest_framework',
     'core',
 ]
@@ -32,6 +33,17 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
+CELERY_BROKER_URL = 'pyamqp://guest@172.26.0.4//'
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_RESULT_BACKEND = 'django-db'
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_BROKER_TRANSPORT_OPTIONS = {
+    'max_retries': 1,
+    'interval_start': 0,
+    'interval_step': 0.5,
+    'interval_max': 3,
+}
 
 ROOT_URLCONF = 'domain_schema.urls'
 
