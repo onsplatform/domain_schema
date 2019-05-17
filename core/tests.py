@@ -35,6 +35,7 @@ class EntityModelTestCase(TestCase):
         assert not migration.first
 
 
+@pytest.mark.usefixtures("celery_app")
 class MigrationModelTestCase(TestCase):
     def test_run_migration(self):
         # mock
@@ -44,10 +45,12 @@ class MigrationModelTestCase(TestCase):
         migration.fields.add(entity.fields.first())
 
         # act
-        exectuted_migration = migration.run()
+        migration.run()
 
         # assert
-        assert migration.date_executed <= datetime.now()
+        migration.refresh_from_db()
+        assert migration.date_executed is not None
+
 
 
 class SolutionTestCase(ModelAPITestCase):

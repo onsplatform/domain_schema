@@ -51,9 +51,8 @@ class EntitySerializer(WritableNestedModelSerializer):
 
     def save(self, **kwargs):
             instance = super(WritableNestedModelSerializer, self).save(**kwargs)
-
-            # TODO: move this step to async task.
             migration = instance.make_migration()
+
             if migration:
                 migration.run()
 

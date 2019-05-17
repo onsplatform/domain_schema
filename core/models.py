@@ -45,10 +45,11 @@ class Entity(models.Model):
         first = not self.migrations.exists()
         fields = self.fields.filter(migration__isnull=True)
 
-        if fields.exists():
-            migration = Migration.objects.create(entity=self, first=first)
-            fields.update(migration=migration)
-            return migration
+        with transaction.atomic():
+            if fields.exists():
+                migration = Migration.objects.create(entity=self, first=first)
+                fields.update(migration=migration)
+                return migration
 
     def save(self, *args, **kwargs):
         with transaction.atomic():
@@ -87,21 +88,9 @@ class Migration(models.Model):
 
     def run(self):
         """apply current migration
-
-        :arg1: TODO
-        :returns: TODO
-
         """
-        command = self._create_table if self.first else self._alter_table
-        command = command().build()
-
-        # TODO: refactor
-        from django.db import connection
-        with connection.cursor() as cursor:
-            cursor.execute(command)
-
-        self.date_executed = datetime.now()
-        self.save()
+        from .tasks import apply_model_migration
+        apply_model_migration.delay(self.id)
 
 
 class Field(models.Model):
