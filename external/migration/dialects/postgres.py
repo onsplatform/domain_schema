@@ -21,6 +21,9 @@ class PostgresCreateTableCommand(BaseCreateTableCommand):
 
         return f'CREATE TABLE "{self.table_name}"'
 
+    def __repr__(self):
+        return self.build_command()
+
 
 class PostgresAlterTableCommand(BaseAlterTableCommand):
     CONSTRAINTS = CONSTRAINTS

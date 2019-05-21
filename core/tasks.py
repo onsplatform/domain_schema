@@ -9,13 +9,14 @@ from .models import Migration
 @app.task(trail=True)
 def apply_model_migration(migration_id):
     migration = Migration.objects.get(pk=migration_id)
-    command = migration._create_table if migration.first else migration._alter_table
-    command = command().build()
+    commands = migration.create_table if migration.first else migration.alter_table
+    command, command_history = commands()
     execution_result = None
 
     with transaction.atomic():
         with connection.cursor() as cursor:
-            exec_result = cursor.execute(command)
+            cursor.execute(command.build())
+            cursor.execute(command_history.build())
 
         migration.date_executed = datetime.now()
         migration.save()

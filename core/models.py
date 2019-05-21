@@ -67,24 +67,37 @@ class Migration(models.Model):
     entity = models.ForeignKey(Entity, on_delete=models.CASCADE, related_name='migrations')
     first = models.BooleanField(default=False)
 
-    def _create_table(self):
+    def _base_table(self, table_name):
+        """
+        returns basic database migration create table command.
+        the command basically creates the table with an integer
+        primary key named id.
+        """
         db_migration = DatabaseMigration(settings.MIGRATION_DIALECT)
-        table = db_migration.create_table(self.entity.table) \
+
+        return db_migration.create_table(table_name) \
             .with_column('id', FIELD_TYPES.INTEGER, primary_key=True)
+
+    def create_table(self):
+        table = self._base_table(self.entity.table)
+        table_history = self._base_table(f'{self.entity.table}_history')
 
         for field in self.fields.all():
             table = table.with_column(field.name, field.field_type)
+            table_history = table_history.with_column(field.name, field.field_type)
 
-        return table
+        return table, table_history,
 
-    def _alter_table(self):
+    def alter_table(self):
         db_migration = DatabaseMigration(settings.MIGRATION_DIALECT)
         table = db_migration.alter_table(self.entity.table)
+        table_history = db_migration.alter_table(f'{self.entity.table}_history')
 
         for field in self.fields.all():
             table = table.add_column(field.name, field.field_type)
+            table_history = table_history.add_column(field.name, field.field_type)
 
-        return table
+        return table, table_history,
 
     def run(self):
         """apply current migration
