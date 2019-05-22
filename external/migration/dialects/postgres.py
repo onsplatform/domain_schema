@@ -12,8 +12,13 @@ CONSTRAINTS = {
 class PostgresCreateTableCommand(BaseCreateTableCommand):
     CONSTRAINTS = CONSTRAINTS
 
-    def _build_column(self, name, _type, constraints):
-        return  f'{name} {_type} {str.join(", ", constraints)}'.strip()
+    def _build_column(self, name, _type, references, constraints):
+        refs = ''
+        if references:
+            ref_table, ref_col = references
+            refs = f' references {ref_table}({ref_col})'
+
+        return  f'{name} {_type}{refs} {str.join(", ", constraints)}'.strip()
 
     def build_command(self):
         if not self.table_name:
@@ -22,7 +27,7 @@ class PostgresCreateTableCommand(BaseCreateTableCommand):
         return f'CREATE TABLE "{self.table_name}"'
 
     def __repr__(self):
-        return self.build_command()
+        return f'table: {self.table_name}\n columns: {self.columns}'
 
 
 class PostgresAlterTableCommand(BaseAlterTableCommand):

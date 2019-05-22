@@ -13,6 +13,7 @@ class FIELD_TYPES(Enum):   # A subclass of Enum
     BOOLEAN = "bool"
     INTEGER = 'int'
     DECIMAL = 'dec'
+    DATE = "timestamp"
 
     def __str__(self):
         return self.value
@@ -67,31 +68,55 @@ class Migration(models.Model):
     entity = models.ForeignKey(Entity, on_delete=models.CASCADE, related_name='migrations')
     first = models.BooleanField(default=False)
 
-    def _base_table(self, table_name):
+    @property
+    def history_table(self):
+        return f'{self.entity.table}_history'
+
+    def _create_history_table(self, migration):
         """
-        returns basic database migration create table command.
-        the command basically creates the table with an integer
+        base create history table command.
+
+        returns:
+        migration command which creates the entity history table
+        with the following columns:
+            - integer primary key named id,
+            - integer foreign key named ref_id referencing the entity itself,
+            - date_created column to keep the version creation date.
+        """
+        return migration.create_table(self.history_table)\
+                .with_column('id', FIELD_TYPES.INTEGER, primary_key=True)\
+                .with_column('ref_id', FIELD_TYPES.INTEGER, references=(self.entity.table, 'id'))\
+                .with_column('da', FIELD_TYPES.DATE,)
+
+    def _create_table(self, migration):
+        """
+        base create table command.
+
+        returns:
+        migration command which creates the entity table with an interger
         primary key named id.
         """
-        db_migration = DatabaseMigration(settings.MIGRATION_DIALECT)
+        return migration.create_table(self.entity.table)\
+                .with_column('id', FIELD_TYPES.INTEGER, primary_key=True)
 
-        return db_migration.create_table(table_name) \
-            .with_column('id', FIELD_TYPES.INTEGER, primary_key=True)
+    def create_tables(self):
+        """
+        creates entity table and history table.
+        """
+        migration = DatabaseMigration(settings.MIGRATION_DIALECT)
+        table = self._create_table(migration)
+        history_table = self._create_history_table(migration)
 
-    def create_table(self):
-        table = self._base_table(self.entity.table)
-        table_history = self._base_table(f'{self.entity.table}_history')
-
-        for field in self.fields.all():
+        for field in self.fields.exclude(name='id'):
             table = table.with_column(field.name, field.field_type)
-            table_history = table_history.with_column(field.name, field.field_type)
+            history_table = history_table.with_column(field.name, field.field_type)
 
-        return table, table_history,
+        return table, history_table,
 
-    def alter_table(self):
+    def alter_tables(self):
         db_migration = DatabaseMigration(settings.MIGRATION_DIALECT)
         table = db_migration.alter_table(self.entity.table)
-        table_history = db_migration.alter_table(f'{self.entity.table}_history')
+        table_history = db_migration.alter_table(self.history_table)
 
         for field in self.fields.all():
             table = table.add_column(field.name, field.field_type)

@@ -38,13 +38,15 @@ class BaseCreateTableCommand(BaseTableManagementCommand):
 
     def _build_columns(self):
         for name, col in self.columns.items():
+            references = col['constraints'].pop('references', None)
             constraints = [
                 self.CONSTRAINTS.get(c)
                 for c, v in col['constraints'].items() if v
             ]
-            yield self._build_column(name, col['type'], constraints)
+            column = self._build_column(name, col['type'], references, constraints)
+            yield column
 
-    def _build_column(self, name, _type, constraints):
+    def _build_column(self, name, _type, references, constraints):
         pass
 
 
