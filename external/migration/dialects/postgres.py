@@ -5,20 +5,30 @@ from ..commands import BaseCreateTableCommand, BaseRenameTableCommand, BaseAlter
 
 CONSTRAINTS = {
     "primary_key": 'PRIMARY KEY',
-    "required": 'NOT NULL'
+    "required": 'NOT NULL',
+    "references": 'REFERENCES {table}({column})',
+    "default": 'DEFAULT {default}'
 }
 
 
 class PostgresCreateTableCommand(BaseCreateTableCommand):
     CONSTRAINTS = CONSTRAINTS
 
-    def _build_column(self, name, _type, references, constraints):
-        refs = ''
-        if references:
-            ref_table, ref_col = references
-            refs = f' references {ref_table}({ref_col})'
+    def _build_column(self, column):
+        refs = None
+        default = None
 
-        return  f'{name} {_type}{refs} {str.join(", ", constraints)}'.strip()
+        if column.references:
+            table, col = column.references
+            refs = self.CONSTRAINTS["references"].format(table=table, column=col)
+
+        if column.default is not None:
+            default = self.CONSTRAINTS['default'].format(default=column.default)
+
+        fields = [column.name, str(column.field_type), refs, default,
+                  str.join(",", column.constraints)]
+
+        return str.join(' ', filter(None, fields))
 
     def build_command(self):
         if not self.table_name:

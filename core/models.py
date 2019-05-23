@@ -14,6 +14,7 @@ class FIELD_TYPES(Enum):   # A subclass of Enum
     INTEGER = 'int'
     DECIMAL = 'dec'
     DATE = "timestamp"
+    UUID = "UUID"
 
     def __str__(self):
         return self.value
@@ -79,25 +80,45 @@ class Migration(models.Model):
         returns:
         migration command which creates the entity history table
         with the following columns:
-            - integer primary key named id,
-            - integer foreign key named ref_id referencing the entity itself,
+            - uuid primary key named id,
+            - uuid foreign key named ref_id referencing the entity itself,
             - date_created column to keep the version creation date.
         """
         return migration.create_table(self.history_table)\
-                .with_column('id', FIELD_TYPES.INTEGER, primary_key=True)\
-                .with_column('ref_id', FIELD_TYPES.INTEGER, references=(self.entity.table, 'id'))\
-                .with_column('da', FIELD_TYPES.DATE,)
+            .with_column(
+                    name='version_id',
+                    field_type=FIELD_TYPES.UUID,
+                    primary_key=True)\
+            .with_column(
+                    name='id',
+                    field_type=FIELD_TYPES.UUID,
+                    references=(self.entity.table, 'id'),
+                    required=True,
+                    default='uuid_generate_v4()')\
+            .with_column(
+                    name='date_created',
+                    required=True,
+                    field_type=FIELD_TYPES.DATE,)
 
     def _create_table(self, migration):
         """
         base create table command.
 
         returns:
-        migration command which creates the entity table with an interger
+        migration command which creates the entity table with an uuid
         primary key named id.
         """
         return migration.create_table(self.entity.table)\
-                .with_column('id', FIELD_TYPES.INTEGER, primary_key=True)
+                .with_column(
+                    name='id',
+                    field_type=FIELD_TYPES.UUID,
+                    primary_key=True,
+                    default='uuid_generate_v4()')\
+                .with_column(
+                    name='date_created',
+                    field_type=FIELD_TYPES.DATE,
+                    required=True,
+                    default='NOW()')
 
     def create_tables(self):
         """

@@ -88,4 +88,8 @@ class Migration(migrations.Migration):
             name='solution',
             field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='apps', to='core.Solution'),
         ),
+
+        migrations.RunSQL(
+            'CREATE EXTENSION "uuid-ossp";'
+        ),
     ]
