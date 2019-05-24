@@ -15,6 +15,7 @@ class FIELD_TYPES(Enum):   # A subclass of Enum
     DECIMAL = 'dec'
     DATE = "timestamp"
     UUID = "UUID"
+    SERIAL = "SERIAL"
 
     def __str__(self):
         return self.value
@@ -57,6 +58,7 @@ class Entity(models.Model):
         with transaction.atomic():
             super(Entity, self).save(*args, **kwargs)
             Field.objects.create(entity=self, name='id', field_type=FIELD_TYPES.INTEGER)
+            Field.objects.create(entity=self, name='date_created', field_type=FIELD_TYPES.DATE)
 
 
 class Migration(models.Model):
@@ -82,23 +84,23 @@ class Migration(models.Model):
         with the following columns:
             - uuid primary key named id,
             - uuid foreign key named ref_id referencing the entity itself,
-            - date_created column to keep the version creation date.
+            - date_created to keep the version creation date.
         """
-        return migration.create_table(self.history_table)\
+        return migration.create_table(self.history_table, 'entities')\
             .with_column(
-                    name='version_id',
-                    field_type=FIELD_TYPES.UUID,
-                    primary_key=True)\
-            .with_column(
-                    name='id',
-                    field_type=FIELD_TYPES.UUID,
-                    references=(self.entity.table, 'id'),
-                    required=True,
-                    default='uuid_generate_v4()')\
-            .with_column(
-                    name='date_created',
-                    required=True,
-                    field_type=FIELD_TYPES.DATE,)
+                name='version_id',
+                field_type=FIELD_TYPES.UUID,
+                primary_key=True,
+                default='entities.uuid_generate_v4()'
+            ).with_column(
+                name='id',
+                field_type=FIELD_TYPES.UUID,
+                references=(self.entity.table, 'id'),
+                required=True,
+            ).with_column(
+                name='date_created',
+                required=True,
+                field_type=FIELD_TYPES.DATE,)
 
     def _create_table(self, migration):
         """
@@ -108,17 +110,20 @@ class Migration(models.Model):
         migration command which creates the entity table with an uuid
         primary key named id.
         """
-        return migration.create_table(self.entity.table)\
-                .with_column(
-                    name='id',
-                    field_type=FIELD_TYPES.UUID,
-                    primary_key=True,
-                    default='uuid_generate_v4()')\
-                .with_column(
-                    name='date_created',
-                    field_type=FIELD_TYPES.DATE,
-                    required=True,
-                    default='NOW()')
+        mig = migration.create_table(self.entity.table, 'entities')\
+            .with_column(
+                name='id',
+                field_type=FIELD_TYPES.UUID,
+                primary_key=True,
+                default='entities.uuid_generate_v4()'
+            ).with_column(
+                name='date_created',
+                field_type=FIELD_TYPES.DATE,
+                required=True,
+                default='NOW()')
+
+
+        return mig
 
     def create_tables(self):
         """
@@ -160,7 +165,7 @@ class Field(models.Model):
     entity = models.ForeignKey(Entity, on_delete=models.CASCADE, related_name='fields')
     migration = models.ForeignKey(Migration, on_delete=models.CASCADE, related_name='fields', null=True)
     field_type = models.CharField(
-        max_length=4,
+        max_length=12,
         choices=[(field, field.value) for field in FIELD_TYPES])
 
 

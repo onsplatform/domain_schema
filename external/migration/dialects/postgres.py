@@ -6,7 +6,7 @@ from ..commands import BaseCreateTableCommand, BaseRenameTableCommand, BaseAlter
 CONSTRAINTS = {
     "primary_key": 'PRIMARY KEY',
     "required": 'NOT NULL',
-    "references": 'REFERENCES {table}({column})',
+    "references": 'REFERENCES {schema}.{table}({column})',
     "default": 'DEFAULT {default}'
 }
 
@@ -20,7 +20,7 @@ class PostgresCreateTableCommand(BaseCreateTableCommand):
 
         if column.references:
             table, col = column.references
-            refs = self.CONSTRAINTS["references"].format(table=table, column=col)
+            refs = self.CONSTRAINTS["references"].format(schema=self.schema, table=table, column=col)
 
         if column.default is not None:
             default = self.CONSTRAINTS['default'].format(default=column.default)
@@ -34,10 +34,7 @@ class PostgresCreateTableCommand(BaseCreateTableCommand):
         if not self.table_name:
             raise Exception('table name not set.')
 
-        return f'CREATE TABLE "{self.table_name}"'
-
-    def __repr__(self):
-        return f'table: {self.table_name}\n columns: {self.columns}'
+        return f'CREATE TABLE {self.schema}."{self.table_name}"'
 
 
 class PostgresAlterTableCommand(BaseAlterTableCommand):
@@ -47,12 +44,12 @@ class PostgresAlterTableCommand(BaseAlterTableCommand):
         return  f'ADD {name} {_type} {str.join(", ", constraints)}'.strip()
 
     def build_command(self):
-        return f'ALTER TABLE "{self.table_name}"'
+        return f'ALTER TABLE {self.schema}."{self.table_name}"'
 
 
 class PostgresRenameTableCommand(BaseRenameTableCommand):
     def build_command(self):
-        return f'ALTER TABLE {self.table_name} RENAME TO {self.name}'
+        return f'ALTER TABLE {self.schema}."{self.table_name}" RENAME TO {self.schema}."{self.name}"'
 
 
 PostgresMigrationDialect = {

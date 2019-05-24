@@ -1,6 +1,7 @@
 from datetime import datetime
 
 from django.test import TestCase
+from rest_framework.test import APITestCase
 
 from core.utils.testing import *
 from core.models import Solution, App, Migration, Entity, \
@@ -33,6 +34,7 @@ class EntityModelTestCase(TestCase):
 
         # assert
         assert not migration.first
+
 
 
 @pytest.mark.usefixtures("celery_app")
@@ -164,3 +166,10 @@ class EntityMapTestCase(ModelAPITestCase):
                 'alias': 'test_alias',
             }]
         }
+
+
+class DataTests(APITestCase):
+
+    def test_create_data_entity(self):
+        assert 1 == 2
+

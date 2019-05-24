@@ -6,8 +6,9 @@ class BaseTableManagementCommand:
     Base database table management command.
     When overridden should be able to manipulate tables.
     """
-    def __init__(self, table_name):
+    def __init__(self, table_name, table_schema='public'):
         self.table_name = table_name
+        self.schema = table_schema
 
     def build(self):
         pass

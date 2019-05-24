@@ -90,6 +90,25 @@ class Migration(migrations.Migration):
         ),
 
         migrations.RunSQL(
-            'CREATE EXTENSION "uuid-ossp";'
+            'CREATE SCHEMA entities'
+        ),
+
+        migrations.RunSQL(
+            'CREATE EXTENSION "uuid-ossp" WITH SCHEMA entities;'
+        ),
+        #uuid_generate_v4()
+        migrations.RunSQL(
+        """
+            CREATE OR REPLACE FUNCTION entities.save_history()
+            RETURNS trigger
+            LANGUAGE plpgsql
+            AS $function$
+                BEGIN
+
+                    EXECUTE 'INSERT INTO entities.' || TG_RELID::regclass::text || '_history SELECT 1 as pk, ($1).*' USING OLD;
+                    RETURN NEW;
+                END;
+            $function$
+        """
         ),
     ]
