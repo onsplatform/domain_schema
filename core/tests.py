@@ -1,7 +1,8 @@
 from datetime import datetime
 
 from django.test import TestCase
-from rest_framework.test import APITestCase
+from rest_framework.test import APITestCase, APIClient
+from django.db import connection, transaction
 
 from core.utils.testing import *
 from core.models import Solution, App, Migration, Entity, \
@@ -168,8 +169,65 @@ class EntityMapTestCase(ModelAPITestCase):
         }
 
 
-class DataTests(APITestCase):
+def table_exists(table_schema, table_name):
+    with connection.cursor() as cursor:
+        query = f"""
+            SELECT COUNT(*)
+            FROM information_schema.tables
+            WHERE table_schema = '{table_schema}' AND table_name = '{table_name}'
+        """
+        cursor.execute(query)
+        ret = cursor.fetchone()
+        return ret[0] > 0
 
-    def test_create_data_entity(self):
-        assert 1 == 2
+def table_columns(table_schema, table_name) :
+        with connection.cursor() as cursor:
+            cursor.execute(f"""
+                SELECT column_name, column_default, is_nullable, data_type
+                FROM "information_schema"."columns"
+                WHERE table_schema='{table_schema}' AND table_name = '{table_name}'
+            """)
+
+            columns = [col[0] for col in cursor.description]
+            return {row[0]: dict(zip(columns[1:], row[1:])) for row in cursor.fetchall()}
+
+class PostgresVersioningSchemaTestCase(APITestCase):
+    def test_create_entity_creates_data_schema(self):
+        # mock
+        sln = Solution.objects.create(name='test_solution')
+        data = {
+            "name": "Entity",
+            "solution_id": sln.id,
+            "table": "tb_entity",
+        }
+
+        # act
+        response = self.client.post('/api/entity/', data, format='json')
+
+        # assert
+        # assert table was created
+        assert table_exists('entities', 'tb_entity_history')
+
+        # assert table schema is correct
+        columns = table_columns('entities', 'tb_entity_history')
+
+        # version_id primary key column
+        version_id_column = columns['version_id']
+        assert version_id_column['column_default'] == 'entities.uuid_generate_v4()'
+        assert version_id_column['is_nullable'] == 'NO'
+        assert version_id_column['data_type'] == 'uuid'
+        # TODO: check is primary key
+        # TODO: check the rest of the schema
+        # TODO: move this test to another location.
+
+
+    def test_updating_data_entity_creates_history_version(self):
+        # mock
+        sln = Solution.objects.create(name='test_solution')
+        entity = Entity.objects.create(
+            name='test_entity', solution=sln, table='tb_test_entity')
+
+        entity
+
+
 
