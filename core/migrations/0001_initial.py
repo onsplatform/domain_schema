@@ -94,9 +94,9 @@ class Migration(migrations.Migration):
         ),
 
         migrations.RunSQL(
-            'CREATE EXTENSION "uuid-ossp" WITH SCHEMA entities;'
+            'CREATE EXTENSION "uuid-ossp";'
         ),
-        #uuid_generate_v4()
+
         migrations.RunSQL(
         """
             CREATE OR REPLACE FUNCTION entities.save_history()

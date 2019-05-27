@@ -44,6 +44,11 @@ class Entity(models.Model):
     name = models.CharField(max_length=30)
     table = models.CharField(max_length=30)
 
+    SCHEMA = {
+        'id': FIELD_TYPES.INTEGER,
+        'date_created': FIELD_TYPES.DATE
+    }
+
     def make_migration(self):
         first = not self.migrations.exists()
         fields = self.fields.filter(migration__isnull=True)
@@ -57,8 +62,9 @@ class Entity(models.Model):
     def save(self, *args, **kwargs):
         with transaction.atomic():
             super(Entity, self).save(*args, **kwargs)
-            Field.objects.create(entity=self, name='id', field_type=FIELD_TYPES.INTEGER)
-            Field.objects.create(entity=self, name='date_created', field_type=FIELD_TYPES.DATE)
+            for field, field_type in self.SCHEMA.items():
+                Field.objects.create(
+                    entity=self, name=field, field_type=field_type)
 
 
 class Migration(models.Model):
@@ -82,8 +88,8 @@ class Migration(models.Model):
         returns:
         migration command which creates the entity history table
         with the following columns:
-            - uuid primary key named id,
-            - uuid foreign key named ref_id referencing the entity itself,
+            - uuid primary key named version_id,
+            - uuid foreign key named id referencing the entity itself,
             - date_created to keep the version creation date.
         """
         return migration.create_table(self.history_table, 'entities')\
@@ -91,7 +97,7 @@ class Migration(models.Model):
                 name='version_id',
                 field_type=FIELD_TYPES.UUID,
                 primary_key=True,
-                default='entities.uuid_generate_v4()'
+                default='uuid_generate_v4()'
             ).with_column(
                 name='id',
                 field_type=FIELD_TYPES.UUID,
@@ -107,23 +113,22 @@ class Migration(models.Model):
         base create table command.
 
         returns:
-        migration command which creates the entity table with an uuid
-        primary key named id.
+        migration command which creates the entity table with the following
+        columns:
+            - primary key named id.
+            - date_created to keep the version creation date.
         """
-        mig = migration.create_table(self.entity.table, 'entities')\
+        return migration.create_table(self.entity.table, 'entities')\
             .with_column(
                 name='id',
                 field_type=FIELD_TYPES.UUID,
                 primary_key=True,
-                default='entities.uuid_generate_v4()'
+                default='uuid_generate_v4()'
             ).with_column(
                 name='date_created',
                 field_type=FIELD_TYPES.DATE,
                 required=True,
                 default='NOW()')
-
-
-        return mig
 
     def create_tables(self):
         """
@@ -133,7 +138,7 @@ class Migration(models.Model):
         table = self._create_table(migration)
         history_table = self._create_history_table(migration)
 
-        for field in self.fields.exclude(name='id'):
+        for field in self.fields.exclude(name__in=(Entity.SCHEMA.keys())):
             table = table.with_column(field.name, field.field_type)
             history_table = history_table.with_column(field.name, field.field_type)
 

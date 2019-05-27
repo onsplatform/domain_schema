@@ -17,7 +17,6 @@ def apply_model_migration(migration_id):
     migration = Migration.objects.get(pk=migration_id)
     commands = migration.create_tables if migration.first else migration.alter_tables
     command, history_command = commands()
-
     command = command.build()
     history_command = history_command.build()
 
