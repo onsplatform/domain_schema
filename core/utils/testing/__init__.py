@@ -12,6 +12,16 @@ class SimpleAPITestCase(APITestCase):
     NESTED_MODELS = {}
     __test__ = False
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._requirements = None
+
+    @property
+    def requirements(self):
+        if not self._requirements:
+            self._requirements = self.build_requirements()
+        return self._requirements
+
     def build_requirements(self):
         """when overriden creates all the necessary requirements
            to allow us to create a new entity under test.
@@ -20,33 +30,32 @@ class SimpleAPITestCase(APITestCase):
         """
         return {}
 
-    def build_nested(self, model):
-        """builds and loads nested objects in the entity under test.
-        """
-        for name, _type in self.NESTED_MODELS.items():
-            nested_attr = getattr(model, name, None)
-
-            if not nested_attr:
-                continue
-
-            data = self.create_data()
-            entities = [_type(**v) for v in data[name]]
-            nested_attr.set(entities, bulk=False)
-
     def build(self):
         """builds the entity under test.
 
         :returns: MODEL instance.
         """
-        data = {**self.create_data(), **self.build_requirements()}
+        create_data = self.create_data()
+        data = {**create_data, **self.requirements}
         model = self.MODEL()
+        nested = []
 
-        for key, val in data.items():
-            if key not in self.NESTED_MODELS:
-                setattr(model, key, val)
+        for name, val in data.items():
+            if name not in self.NESTED_MODELS:
+                setattr(model, name, val)
+                continue
 
+            _type = self.NESTED_MODELS[name]
+            entities = [_type(**v) for v in data[name]]
+            nested.append((entities, getattr(model, name),))
+
+        # we need to save the model first, otherwise django does not let us
+        # update nested objects.
         model.save()
-        self.build_nested(model)
+        for models, setter in nested:
+            setter.set(models, bulk=False)
+
+        # self.build_nested(model)
         return model
 
 
@@ -55,10 +64,6 @@ class ModelAPITestCase(SimpleAPITestCase,
                        ModelAPIUpdateTestMixin,
                        ModelAPIQueryTestMixin):
     pass
-
-
-
-
 
 
 

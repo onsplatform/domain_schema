@@ -1,8 +1,7 @@
-import pytest
-
 from core.utils.testing import *
+from core.utils import postgres as pg
 
-from core.models import Solution, App, Entity, \
+from core.models import Solution, App, Migration, Entity, \
         Field, EntityMap, MappedField, FIELD_TYPES
 
 
@@ -48,12 +47,13 @@ class EntityTestCase(ModelAPITestCase):
 
     def build_requirements(self):
         return {
-            'solution': Solution.objects.create(name='test_solution')
+            'solution': Solution.objects.create(name='test_solution'),
         }
 
     def create_data(self):
         return {
             'name': 'test_entity',
+            'table': 'test_table',
             'fields': [{
                 'name': 'name',
                 'field_type': 'char',
@@ -63,32 +63,37 @@ class EntityTestCase(ModelAPITestCase):
     def update_data(self):
         return {
             'name': 'test_entity_upd',
+            'table': 'test_table',
             'fields': [{
                 'name': 'name',
                 'field_type': 'char',
             }]
         }
 
+
 class EntityMapTestCase(ModelAPITestCase):
     MODEL = EntityMap
-    NESTED_MODELS = {'fields': MappedField}
+    NESTED_MODELS = {
+        'fields': MappedField,
+    }
     __test__ = True
 
     def build_requirements(self):
         sln = Solution.objects.create(name='test_solution')
         app = App.objects.create(name='test_app', solution=sln)
-        entity = Entity.objects.create(name='test_entity', solution=sln, table='tb_test_entity')
+        entity = Entity.objects.create(
+            name='test_entity', solution=sln, table='tb_test_entity')
 
         return {
-            'solution': sln,
-            'app': app,
             'entity': entity,
+            'app': app,
         }
 
     def create_data(self):
-        sln = Solution.objects.create(name='test_solution')
-        entity = Entity.objects.create(name='test_entity', solution=sln, table='tb_test_entity')
-        field  = Field.objects.create(entity=entity, name='test_field', field_type=FIELD_TYPES.INTEGER)
+        field  = Field.objects.create(
+            entity=self.requirements['entity'],
+            name='test_field',
+            field_type=FIELD_TYPES.INTEGER)
 
         return {
             'name': 'test_map',
@@ -99,9 +104,10 @@ class EntityMapTestCase(ModelAPITestCase):
         }
 
     def update_data(self):
-        sln = Solution.objects.create(name='test_solution')
-        entity = Entity.objects.create(name='test_entity', solution=sln, table='tb_test_entity')
-        field  = Field.objects.create(entity=entity, name='test_field', field_type=FIELD_TYPES.INTEGER)
+        field  = Field.objects.create(
+            entity=self.requirements['entity'],
+            name='test_field',
+            field_type=FIELD_TYPES.INTEGER)
 
         return {
             'name': 'test_map_upd',
@@ -110,4 +116,3 @@ class EntityMapTestCase(ModelAPITestCase):
                 'alias': 'test_alias',
             }]
         }
-

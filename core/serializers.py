@@ -43,17 +43,20 @@ class EntitySerializer(WritableNestedModelSerializer):
     entity model serializer
     """
     solution_id = serializers.IntegerField(required=True)
-    fields = FieldSerializer(many=True)
+    fields = FieldSerializer(many=True, required=False)
 
     class Meta:
         model = models.Entity
-        fields = ('id', 'name', 'solution_id', 'fields', )
+        fields = ('id', 'name', 'solution_id', 'fields', 'table',  )
 
     def save(self, **kwargs):
-        instance = super(WritableNestedModelSerializer, self).save(**kwargs)
-        # migration.migrate(instance)
-        return instance
+            instance = super(WritableNestedModelSerializer, self).save(**kwargs)
+            migration = instance.make_migration()
 
+            if migration:
+                migration.run()
+
+            return instance
 
 class MappedFieldSerializer(serializers.ModelSerializer):
     field_id = serializers.IntegerField(required=True)

@@ -1,5 +1,9 @@
 import os
 
+from external.migration.dialects.postgres import \
+        PostgresMigrationDialect as MigrationDialect
+
+
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 SECRET_KEY = 'cle=^s5#t8f6ja%929hz*d83k*z_5&x_eyvp3^a2p&*+hv@80w'
@@ -15,6 +19,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django_celery_results',
     'rest_framework',
     'core',
 ]
@@ -28,6 +33,17 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
+CELERY_BROKER_URL = 'pyamqp://guest@172.26.0.4//'
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_RESULT_BACKEND = 'django-db'
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_BROKER_TRANSPORT_OPTIONS = {
+    'max_retries': 1,
+    'interval_start': 0,
+    'interval_step': 0.5,
+    'interval_max': 3,
+}
 
 ROOT_URLCONF = 'domain_schema.urls'
 
@@ -51,9 +67,13 @@ WSGI_APPLICATION = 'domain_schema.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-    }
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': 'platform_domain_schema',
+        'USER': 'postgres',
+        'PASSWORD': 'postgres',
+        'HOST': 'localhost',
+        'PORT': 5432,
+    },
 }
 
 AUTH_PASSWORD_VALIDATORS = [
@@ -82,3 +102,5 @@ USE_L10N = True
 USE_TZ = True
 
 STATIC_URL = '/static/'
+
+MIGRATION_DIALECT = MigrationDialect
