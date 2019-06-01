@@ -105,7 +105,7 @@ class Migration(migrations.Migration):
             AS $function$
                 BEGIN
 
-                    EXECUTE 'INSERT INTO ' || TG_RELID::regclass::text || '_history SELECT $1.id as version_id, ($1).*' USING OLD;
+                    EXECUTE 'INSERT INTO ' || TG_RELID::regclass::text || '_history SELECT $1.id as id, ($1).*' USING OLD;
                     RETURN NEW;
                 END;
             $function$
