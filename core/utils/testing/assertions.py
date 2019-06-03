@@ -16,6 +16,8 @@ def assert_status_code(response, expected_code):
     """
     asserts request object has an expected status code.
     """
+    if response.status_code == 400:
+        __import__('ipdb').set_trace()
     assert response.status_code == expected_code, ASSERTION_MESSAGES['STATUS_CODE'] % (expected_code, response.status_code)
 
 

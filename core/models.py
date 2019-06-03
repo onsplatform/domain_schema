@@ -25,7 +25,7 @@ class Solution(models.Model):
     """
     Solution model. This is the main solution to which the platform will serve. (SAGER)
     """
-    name = models.CharField(max_length=30)
+    name = models.CharField(max_length=30, unique=True)
 
 
 class App(models.Model):
@@ -42,7 +42,7 @@ class Entity(models.Model):
     """
     solution = models.ForeignKey(Solution, on_delete=models.CASCADE, related_name='entities')
     name = models.CharField(max_length=30)
-    table = models.CharField(max_length=30)
+    table = models.CharField(max_length=30, unique=True)
 
     SCHEMA = {
         'id': FIELD_TYPES.INTEGER,
