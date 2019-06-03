@@ -74,7 +74,7 @@ class EntitySerializer(WritableNestedModelSerializer):
 
     def create(self, validated_data):
         validated_data['table'] = self.build_table_name()
-        return models.Entity(**validated_data)
+        return super(WritableNestedModelSerializer, self).create(validated_data)
 
     def save(self, **kwargs):
         instance = super(WritableNestedModelSerializer, self).save(**kwargs)
