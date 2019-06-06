@@ -20,6 +20,27 @@ services:
       schema_network:
         ipv4_address: 172.10.0.3
 
+  rabbit:
+    ports:
+      - "127.0.0.1:5462:5432"
+    networks:
+      schema_network:
+        ipv4_address: 172.10.0.4
+    image: "rabbitmq:3-management"
+
+  domain_worker:
+    networks:
+      schema_network:
+        ipv4_address: 172.10.0.5
+    build: 
+      context: .
+      dockerfile: Dockerfile.domain_worker
+    depends_on:
+      - 'postgres'
+      - 'rabbit'
+    environment:
+      - POSTGRES=postgres
+
 networks:
   schema_network:
     ipam:
