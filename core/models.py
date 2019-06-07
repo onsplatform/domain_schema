@@ -192,19 +192,20 @@ class MappedField(models.Model):
     alias = models.CharField(max_length=30)
 
 
-class Filter(models.Model):
+class MapFilter(models.Model):
     """
     Map filter
     """
+    map = models.ForeignKey(EntityMap, on_delete=models.CASCADE, related_name='filters')
     name = models.CharField(max_length=30)
     expression = models.TextField()
 
 
-class FilterParameter:
+class MapFilterParameter(models.Model):
     """
     Map filter parameter
     """
-    filter = models.ForeignKey(Filter, on_delete=models.CASCADE, related_name='parameters')
+    filter = models.ForeignKey(MapFilter, on_delete=models.CASCADE, related_name='parameters')
     name = models.CharField(max_length=30)
     field_type = models.CharField(
         max_length=12,
