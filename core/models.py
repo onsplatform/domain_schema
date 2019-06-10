@@ -59,12 +59,21 @@ class Entity(models.Model):
                 fields.update(migration=migration)
                 return migration
 
+    def build_table_name(self):
+        if not self.table:
+            solution_name = self.solution.name[0:30].strip().lower()
+            entity_name = self.name[0:30].strip().lower()
+            self.table = f'{solution_name}_{entity_name}'
+
     def save(self, *args, **kwargs):
+        self.build_table_name()
+
         with transaction.atomic():
             super(Entity, self).save(*args, **kwargs)
-            for field, field_type in self.SCHEMA.items():
-                Field.objects.create(
-                    entity=self, name=field, field_type=field_type)
+            fields = [
+                Field(entity=self, name=f, field_type=t) for f, t in self.SCHEMA.items()
+            ]
+            Field.objects.bulk_create(fields)
 
 
 class Migration(models.Model):
@@ -221,6 +230,9 @@ class MapFilterParameter(models.Model):
 
 
 class Branch(models.Model):
+    """
+    Branch
+    """
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     solution = models.ForeignKey(Solution, on_delete=models.CASCADE, related_name='branches')
     name = models.CharField(max_length=30)

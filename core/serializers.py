@@ -66,16 +66,6 @@ class EntitySerializer(WritableNestedModelSerializer):
                 fields=('solution_id', 'name'))
         ]
 
-    def build_table_name(self):
-        solution = models.Solution.objects.get(pk=self.validated_data['solution_id'])
-        solution_name = solution.name[0:30].strip().lower()
-        entity_name = self.validated_data['name'][0:30].strip().lower()
-        return f'{solution_name}_{entity_name}'
-
-    def create(self, validated_data):
-        validated_data['table'] = self.build_table_name()
-        return super(WritableNestedModelSerializer, self).create(validated_data)
-
     def save(self, **kwargs):
         instance = super(WritableNestedModelSerializer, self).save(**kwargs)
         migration = instance.make_migration()
@@ -84,8 +74,6 @@ class EntitySerializer(WritableNestedModelSerializer):
             migration.run()
 
         return instance
-
-
 
 
 class MapFilterParameterSerializer(serializers.ModelSerializer):
