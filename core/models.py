@@ -106,7 +106,11 @@ class Migration(models.Model):
             ).with_column(
                 name='date_created',
                 required=True,
-                field_type=FIELD_TYPES.DATE,)
+                field_type=FIELD_TYPES.DATE,
+            ).with_column(
+                name='branch',
+                field_type=FIELD_TYPES.UUID,
+            )
 
     def _create_table(self, migration):
         """
@@ -128,7 +132,11 @@ class Migration(models.Model):
                 name='date_created',
                 field_type=FIELD_TYPES.DATE,
                 required=True,
-                default='NOW()')
+                default='NOW()'
+            ).with_column(
+                name='branch',
+                field_type=FIELD_TYPES.UUID,
+            )
 
     def create_tables(self):
         """
@@ -210,4 +218,10 @@ class MapFilterParameter(models.Model):
     field_type = models.CharField(
         max_length=12,
         choices=[(field, field.value) for field in FIELD_TYPES])
+
+
+class Branch(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    solution = models.ForeignKey(Solution, on_delete=models.CASCADE, related_name='branches')
+    name = models.CharField(max_length=30)
 
