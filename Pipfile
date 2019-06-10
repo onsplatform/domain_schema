@@ -7,6 +7,9 @@ verify_ssl = true
 ipdb = "*"
 pytest = "*"
 pytest-django = "*"
+pyyaml = "*"
+pylint = "*"
+rope = "*"
 
 [packages]
 djangorestframework = "==3.9.2"
