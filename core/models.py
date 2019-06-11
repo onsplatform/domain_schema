@@ -59,12 +59,21 @@ class Entity(models.Model):
                 fields.update(migration=migration)
                 return migration
 
+    def build_table_name(self):
+        if not self.table:
+            solution_name = self.solution.name[0:30].strip().lower()
+            entity_name = self.name[0:30].strip().lower()
+            self.table = f'{solution_name}_{entity_name}'
+
     def save(self, *args, **kwargs):
+        self.build_table_name()
+
         with transaction.atomic():
             super(Entity, self).save(*args, **kwargs)
-            for field, field_type in self.SCHEMA.items():
-                Field.objects.create(
-                    entity=self, name=field, field_type=field_type)
+            fields = [
+                Field(entity=self, name=f, field_type=t) for f, t in self.SCHEMA.items()
+            ]
+            Field.objects.bulk_create(fields)
 
 
 class Migration(models.Model):
@@ -106,7 +115,11 @@ class Migration(models.Model):
             ).with_column(
                 name='date_created',
                 required=True,
-                field_type=FIELD_TYPES.DATE,)
+                field_type=FIELD_TYPES.DATE,
+            ).with_column(
+                name='branch',
+                field_type=FIELD_TYPES.UUID,
+            )
 
     def _create_table(self, migration):
         """
@@ -128,7 +141,11 @@ class Migration(models.Model):
                 name='date_created',
                 field_type=FIELD_TYPES.DATE,
                 required=True,
-                default='NOW()')
+                default='NOW()'
+            ).with_column(
+                name='branch',
+                field_type=FIELD_TYPES.UUID,
+            )
 
     def create_tables(self):
         """
@@ -190,4 +207,33 @@ class MappedField(models.Model):
     entity_map = models.ForeignKey(EntityMap, on_delete=models.CASCADE, related_name='fields')
     field = models.ForeignKey(Field, on_delete=models.CASCADE, related_name='mappings')
     alias = models.CharField(max_length=30)
+
+
+class MapFilter(models.Model):
+    """
+    Map filter
+    """
+    map = models.ForeignKey(EntityMap, on_delete=models.CASCADE, related_name='filters')
+    name = models.CharField(max_length=30)
+    expression = models.TextField()
+
+
+class MapFilterParameter(models.Model):
+    """
+    Map filter parameter
+    """
+    filter = models.ForeignKey(MapFilter, on_delete=models.CASCADE, related_name='parameters')
+    name = models.CharField(max_length=30)
+    field_type = models.CharField(
+        max_length=12,
+        choices=[(field, field.value) for field in FIELD_TYPES])
+
+
+class Branch(models.Model):
+    """
+    Branch
+    """
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    solution = models.ForeignKey(Solution, on_delete=models.CASCADE, related_name='branches')
+    name = models.CharField(max_length=30)
 

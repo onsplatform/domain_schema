@@ -66,16 +66,6 @@ class EntitySerializer(WritableNestedModelSerializer):
                 fields=('solution_id', 'name'))
         ]
 
-    def build_table_name(self):
-        solution = models.Solution.objects.get(pk=self.validated_data['solution_id'])
-        solution_name = solution.name[0:30].strip().lower()
-        entity_name = self.validated_data['name'][0:30].strip().lower()
-        return f'{solution_name}_{entity_name}'
-
-    def create(self, validated_data):
-        validated_data['table'] = self.build_table_name()
-        return super(WritableNestedModelSerializer, self).create(validated_data)
-
     def save(self, **kwargs):
         instance = super(WritableNestedModelSerializer, self).save(**kwargs)
         migration = instance.make_migration()
@@ -86,27 +76,58 @@ class EntitySerializer(WritableNestedModelSerializer):
         return instance
 
 
+class MapFilterParameterSerializer(serializers.ModelSerializer):
+    field_type = serializers.CharField()
+
+    class Meta:
+        model = models.MapFilterParameter
+        fields = ('name', 'field_type', )
+        validators = [
+            UniqueTogetherValidator(
+                queryset=models.MapFilterParameter.objects.all(),
+                fields=('filter_id', 'name', ))
+        ]
+
+
+class MapFilterSerializer(serializers.ModelSerializer):
+    parameters = MapFilterParameterSerializer(many=True)
+
+    class Meta:
+        model = models.MapFilter
+        fields = ('name', 'expression', 'parameters', )
+        validators = [
+            UniqueTogetherValidator(
+                queryset=models.MapFilter.objects.all(),
+                fields=('map_id', 'name'))
+        ]
+
+
 class MappedFieldSerializer(serializers.ModelSerializer):
-    field_id = serializers.IntegerField(required=True)
-    field_type = serializers.SlugRelatedField(slug_field='field_type', read_only=True)
-    column_name = serializers.SlugRelatedField(slug_field='name', read_only=True)
-    entity_map_id = serializers.IntegerField(read_only=True)
+    field_id = serializers.IntegerField(required=True, write_only=True)
+    # field_type = serializers.SlugRelatedField(slug_field='field_type', read_only=True)
+    field_type = serializers.ReadOnlyField(source='field.field_type', read_only=True)
+    column_name = serializers.ReadOnlyField(source='field.name', read_only=True)
 
     class Meta:
         model = models.MappedField
-        fields = ('id', 'field_id', 'field_type', 'column_name', 'alias', 'entity_map_id', )
+        fields = ('field_id', 'field_type', 'column_name', 'alias', )
 
 
 class EntityMapSerializer(WritableNestedModelSerializer):
-    app_id = serializers.IntegerField(required=True)
-    entity_id = serializers.IntegerField(required=True)
-    entity = serializers.SlugRelatedField(slug_field='name', read_only=True)
-    table = serializers.SlugRelatedField(slug_field='table_name', read_only=True)
+    class EntityNestedSerializer(serializers.ModelSerializer):
+        class Meta:
+            model = models.Entity
+            fields = ('name', 'table',)
+
+    app_id = serializers.IntegerField(required=True, write_only=True)
+    entity_id = serializers.IntegerField(required=True, write_only=True)
     fields = MappedFieldSerializer(many=True)
+    filters = MapFilterSerializer(many=True)
+    model = EntityNestedSerializer(source='entity')
 
     class Meta:
         model = models.EntityMap
-        fields = ('id', 'app_id', 'entity_id', 'name', 'entity', 'table', 'fields', )
+        fields = ('app_id', 'entity_id', 'model', 'fields', 'filters', )
 
         validators = [
             UniqueTogetherValidator(
