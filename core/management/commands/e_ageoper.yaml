@@ -1,0 +1,13 @@
+e_ageoper: # Agente de Operação
+  id_age: # Identificador do Agente
+    - string
+  ido_ons: # Identificador Operativo do ONS
+    - string
+  nom_curto: # Nome Curto do Agente
+    - string
+  dat_entrada: # Data de Entrada em Operação
+    - datetime    
+  dat_desativacao: # Data de Desativação do Agente
+    - datetime
+  nom_longo: # Nome Longo do Agente
+    - string
