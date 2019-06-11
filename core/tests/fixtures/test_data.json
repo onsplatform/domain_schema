@@ -77,7 +77,7 @@
         "pk": 1,
         "fields": {
             "entity_map": 1,
-            "field": 1,
+            "field": 3,
             "alias": "nom"
         }
     },
