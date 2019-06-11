@@ -22,58 +22,41 @@ class Command(BaseCommand):
             }
         """
         # open folder and list all yaml files within it.
-        yamlList = self.listYamlFiles('./domain_schema/core/management/commands/')
+        yamlFiles = self.listYamlFiles('./core/management/commands/')
 
         # if there are yaml files at path
-        if yamlList:
+        if yamlFiles:
             # for each file in folder...
-            for file in yamlList:
+            for file in yamlFiles:
+                import pdb; pdb.set_trace()
                 try:
                     entityName = ''
                     fields = {}
-                    myEntity = Entity()
-                    myFields = Field()
-                    
+                    myEntity = None
+                                      
                     # Open file, read it, populate variables, close file.
                     # Perhaps we should extract a method here...
                     with open(file, 'r', encoding='utf-8') as stream:
                         yamlDict = yaml.load(stream,Loader=yaml.FullLoader)
 
                         for data in yamlDict.items():
-                            entityName = data[0]
+                            myEntity = Entity.objects.create(name=data[0])
                             fields = data[1]
 
                     # Create Entity and link Fields to it.
                     myEntity.name = entityName
-                    myFields.entity = entityName                                          
-                    
+
                     # We have to review this loop
-                    for k,v in fields.item():
-                        myFields.name = k
-                        myFields.field_type = v
-                        myFields.save()
-                    
-                    myEntity.save()
+                    for k,v in fields.items():
+                        myField = Field()
+                        myField.name = k
+                        myField.field_type = v[0]
+                        myEntity.fields.add(myField)
+                        myField.save()
 
                 except OSError:
                     return "Program was not able to open file at given destination"
                     
-        # ler yaml - ok
-        # colocar num dict - ok
-        # ex:
-        # data = [
-        # {
-        #  solution=1,
-        #  name="usina",
-        # },
-        # {
-        #  solution=1,
-        #  name="usina",
-        # },
-        # ]
-
-        #entiies = [Entity(**d) for d in data]
-
         #print('do it here...')
         import pdb; pdb.set_trace()  
         x = 1
