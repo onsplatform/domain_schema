@@ -4,7 +4,7 @@ import yaml, io
 from glob import glob
 from typing import List
 
-from core.models import Entity, Field
+from core.models import *
 
 class Command(BaseCommand):
     def handle(self, **options):
@@ -23,12 +23,16 @@ class Command(BaseCommand):
         """
         # open folder and list all yaml files within it.
         yamlFiles = self.listYamlFiles('./core/management/commands/')
+        import pdb; pdb.set_trace()
+
+        # make sure the solution is created or exists before creating new Entities
+        sln = self.createSolution('SAGER')
 
         # if there are yaml files at path
         if yamlFiles:
             # for each file in folder...
             for file in yamlFiles:
-                import pdb; pdb.set_trace()
+                
                 try:
                     entityName = ''
                     fields = {}
@@ -40,7 +44,7 @@ class Command(BaseCommand):
                         yamlDict = yaml.load(stream,Loader=yaml.FullLoader)
 
                         for data in yamlDict.items():
-                            myEntity = Entity.objects.create(name=data[0])
+                            myEntity = Entity.objects.create(name=data[0],solution=sln)
                             fields = data[1]
 
                     # Create Entity and link Fields to it.
@@ -62,6 +66,20 @@ class Command(BaseCommand):
         x = 1
         pass
     
+    def createSolution(self, solutionName):
+        """
+        Creates a solution or returns a Solution object if it already exists.
+        """
+        solution = None
+
+        if not Solution.objects.filter(name=solutionName).exists():
+            solution = Solution.objects.create(name=solutionName)
+            return solution
+        
+        solution = Solution.objects.get(name=solutionName)
+
+        return solution
+
     def listFiles(self):
         next(walk('./domain_schema'))
         return 'x'
