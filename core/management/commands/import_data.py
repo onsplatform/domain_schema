@@ -80,10 +80,6 @@ class Command(BaseCommand):
 
         return solution
 
-    def listFiles(self):
-        next(walk('./domain_schema'))
-        return 'x'
-
     def listYamlFiles(self, filepath) -> List:
         """ Returns a list of YAML files in a given path.
         """       
