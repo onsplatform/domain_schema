@@ -24,23 +24,12 @@
         }
     },
     {
-        "model": "core.migration",
-        "pk": "7deff93b-e269-4198-a0f4-3fe937b0b2cd",
-        "fields": {
-            "date_created": "2019-06-07T20:38:07.485Z",
-            "date_executed": "2019-06-07T20:38:07.485Z",
-            "entity": 1,
-            "first": true
-        }
-    },
-    {
         "model": "core.field",
         "pk": 1,
         "fields": {
             "name": "id",
             "entity": 1,
-            "migration": "7deff93b-e269-4198-a0f4-3fe937b0b2cd",
-            "field_type": "int"
+            "field_type": "uuid"
         }
     },
     {
@@ -49,7 +38,6 @@
         "fields": {
             "name": "date_created",
             "entity": 1,
-            "migration": "7deff93b-e269-4198-a0f4-3fe937b0b2cd",
             "field_type": "timestamp"
         }
     },
@@ -59,7 +47,6 @@
         "fields": {
             "name": "nome",
             "entity": 1,
-            "migration": "7deff93b-e269-4198-a0f4-3fe937b0b2cd",
             "field_type": "char"
         }
     },
