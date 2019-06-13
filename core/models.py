@@ -183,7 +183,7 @@ class Field(models.Model):
     """
     field model
     """
-    name = models.CharField(max_length=30)
+    name = models.CharField(max_length=50)
     entity = models.ForeignKey(Entity, on_delete=models.CASCADE, related_name='fields')
     migration = models.ForeignKey(Migration, on_delete=models.CASCADE, related_name='fields', null=True)
     field_type = models.CharField(

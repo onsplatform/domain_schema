@@ -4,7 +4,7 @@ import yaml, io
 from glob import glob
 from typing import List
 
-from core.models import *
+from core.models import Entity, Solution, Field
 
 class Command(BaseCommand):
     def handle(self, **options):
@@ -44,7 +44,8 @@ class Command(BaseCommand):
                         yamlDict = yaml.load(stream,Loader=yaml.FullLoader)
 
                         for data in yamlDict.items():
-                            myEntity = Entity.objects.create(name=data[0],solution=sln)
+                            myEntity = self.createEntity(name=data[0], solution=sln)
+                            #myEntity = Entity.objects.create(name=data[0],solution=sln)
                             fields = data[1]
 
                     # Create Entity and link Fields to it.
@@ -55,7 +56,8 @@ class Command(BaseCommand):
                         myField = Field()
                         myField.name = k
                         myField.field_type = v[0]
-                        myEntity.fields.add(myField)
+                        myField.entity = myEntity
+                        #myEntity.fields.add(myField)
                         myField.save()
 
                 except OSError:
@@ -65,12 +67,15 @@ class Command(BaseCommand):
         import pdb; pdb.set_trace()  
         x = 1
         pass
-    
+        
     def createSolution(self, solutionName):
         """
         Creates a solution or returns a Solution object if it already exists.
         """
         solution = None
+
+        # Delete all solution objects and recreate them
+        Solution.objects.all().delete()
 
         if not Solution.objects.filter(name=solutionName).exists():
             solution = Solution.objects.create(name=solutionName)
@@ -79,6 +84,19 @@ class Command(BaseCommand):
         solution = Solution.objects.get(name=solutionName)
 
         return solution
+
+
+    def createEntity(self, **kwargs):
+        """
+        Creates an Entity or returns an entity being called.
+        """
+        currentEntity = None
+        if not Entity.objects.filter(**kwargs).exists():
+            currentEntity = Entity.objects.create(**kwargs)
+            return currentEntity
+        
+        currentEntity = Entity.objects.get(**kwargs)
+        return currentEntity  
 
     def listYamlFiles(self, filepath) -> List:
         """ Returns a list of YAML files in a given path.
