@@ -46,7 +46,8 @@ class Entity(models.Model):
 
     SCHEMA = {
         'id': FIELD_TYPES.INTEGER,
-        'date_created': FIELD_TYPES.DATE
+        'date_created': FIELD_TYPES.DATE,
+        'branch': FIELD_TYPES.UUID,
     }
 
     def make_migration(self):
