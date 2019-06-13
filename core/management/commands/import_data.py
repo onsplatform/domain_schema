@@ -23,8 +23,7 @@ class Command(BaseCommand):
         """
         # open folder and list all yaml files within it.
         yamlFiles = self.listYamlFiles('./core/management/commands/')
-        import pdb; pdb.set_trace()
-
+        
         # make sure the solution is created or exists before creating new Entities
         sln = self.createSolution('SAGER')
 
@@ -61,11 +60,7 @@ class Command(BaseCommand):
 
                 except OSError:
                     return "Program was not able to open file at given destination"
-                    
-        #print('do it here...')
-        import pdb; pdb.set_trace()  
-        x = 1
-        pass
+
         
     def createSolution(self, solutionName):
         """
