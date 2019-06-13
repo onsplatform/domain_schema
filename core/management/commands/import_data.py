@@ -45,7 +45,6 @@ class Command(BaseCommand):
 
                         for data in yamlDict.items():
                             myEntity = self.createEntity(name=data[0], solution=sln)
-                            #myEntity = Entity.objects.create(name=data[0],solution=sln)
                             fields = data[1]
 
                     # Create Entity and link Fields to it.
