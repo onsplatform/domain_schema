@@ -41,8 +41,8 @@ class Entity(models.Model):
     Entity model. This is the Entity that will be used in the solution. (USINA)
     """
     solution = models.ForeignKey(Solution, on_delete=models.CASCADE, related_name='entities')
-    name = models.CharField(max_length=30)
-    table = models.CharField(max_length=30, unique=True)
+    name = models.CharField(max_length=50)
+    table = models.CharField(max_length=50, unique=True)
 
     SCHEMA = {
         'id': FIELD_TYPES.INTEGER,
@@ -62,8 +62,8 @@ class Entity(models.Model):
 
     def build_table_name(self):
         if not self.table:
-            solution_name = self.solution.name[0:30].strip().lower()
-            entity_name = self.name[0:30].strip().lower()
+            solution_name = self.solution.name[0:50].strip().lower()
+            entity_name = self.name[0:50].strip().lower()
             self.table = f'{solution_name}_{entity_name}'
 
     def save(self, *args, **kwargs):
@@ -185,7 +185,7 @@ class Field(models.Model):
     """
     field model
     """
-    name = models.CharField(max_length=30)
+    name = models.CharField(max_length=50)
     entity = models.ForeignKey(Entity, on_delete=models.CASCADE, related_name='fields')
     migration = models.ForeignKey(Migration, on_delete=models.CASCADE, related_name='fields', null=True)
     field_type = models.CharField(
