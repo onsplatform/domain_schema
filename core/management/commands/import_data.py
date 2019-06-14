@@ -1,10 +1,9 @@
+import yaml
 from django.core.management.base import BaseCommand
-from os import walk, path
-import yaml, io
-from glob import glob
-from typing import List
 
 from core.models import Entity, Solution, Field
+from core.utils import yaml_helper
+
 
 class Command(BaseCommand):
     def handle(self, **options):
@@ -22,80 +21,68 @@ class Command(BaseCommand):
             }
         """
         # open folder and list all yaml files within it.
-        yamlFiles = self.listYamlFiles('./core/management/commands/')
-        
+        # TODO: refactor this to receive directory as a parameter
+        yaml_files = yaml_helper.list_files('./core/management/commands/')
+
         # make sure the solution is created or exists before creating new Entities
-        sln = self.createSolution('SAGER')
+        sln = self.create_solution('SAGER')
 
         # if there are yaml files at path
-        if yamlFiles:
+        if yaml_files:
             # for each file in folder...
-            for file in yamlFiles:
-                
+            for file in yaml_files:
                 try:
-                    entityName = ''
+                    entity_name: str = ''
                     fields = {}
-                    myEntity = None
-                                      
+                    my_entity = None
+
                     # Open file, read it, populate variables, close file.
                     # Perhaps we should extract a method here...
                     with open(file, 'r', encoding='utf-8') as stream:
-                        yamlDict = yaml.load(stream,Loader=yaml.FullLoader)
+                        yaml_dict = yaml.load(stream, Loader=yaml.FullLoader)
 
-                        for data in yamlDict.items():
-                            myEntity = self.createEntity(name=data[0], solution=sln)
+                        for data in yaml_dict.items():
+                            my_entity = self.create_entity(name=data[0], solution=sln)
                             fields = data[1]
 
                     # Create Entity and link Fields to it.
-                    myEntity.name = entityName
+                    my_entity.name = entity_name
 
                     # We have to review this loop
-                    for k,v in fields.items():
-                        myField = Field()
-                        myField.name = k
-                        myField.field_type = v[0]
-                        myField.entity = myEntity
-                        #myEntity.fields.add(myField)
-                        myField.save()
+                    for k, v in fields.items():
+                        my_field = Field()
+                        my_field.name = k
+                        my_field.field_type = v[0]
+                        my_field.entity = my_entity
+                        my_field.save()
 
                 except OSError:
                     return "Program was not able to open file at given destination"
 
-        
-    def createSolution(self, solutionName):
+    @staticmethod
+    def create_solution(solution_name: str):
         """
         Creates a solution or returns a Solution object if it already exists.
         """
-        solution = None
-
         # Delete all solution objects and recreate them
         Solution.objects.all().delete()
 
-        if not Solution.objects.filter(name=solutionName).exists():
-            solution = Solution.objects.create(name=solutionName)
+        if not Solution.objects.filter(name=solution_name).exists():
+            solution = Solution.objects.create(name=solution_name)
             return solution
-        
-        solution = Solution.objects.get(name=solutionName)
+
+        solution = Solution.objects.get(name=solution_name)
 
         return solution
 
-
-    def createEntity(self, **kwargs):
+    @staticmethod
+    def create_entity(**kwargs):
         """
         Creates an Entity or returns an entity being called.
         """
-        currentEntity = None
         if not Entity.objects.filter(**kwargs).exists():
-            currentEntity = Entity.objects.create(**kwargs)
-            return currentEntity
-        
-        currentEntity = Entity.objects.get(**kwargs)
-        return currentEntity  
+            current_entity = Entity.objects.create(**kwargs)
+            return current_entity
 
-    def listYamlFiles(self, filepath) -> List:
-        """ Returns a list of YAML files in a given path.
-        """       
-        # check if path exists
-        if path.exists(filepath):
-            yamlFiles = glob(filepath + '*.yaml')
-            return yamlFiles
+        current_entity = Entity.objects.get(**kwargs)
+        return current_entity
