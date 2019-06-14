@@ -99,3 +99,16 @@ class MigrationModelTestCase(TestCase):
         # assert migration was marked as executed.
         migration.refresh_from_db()
         assert migration.date_executed is not None
+
+
+class EntityMapModelTest(TestCase):
+    def test_create_map_add_id_field_by_default(self):
+        sln = Solution.objects.create(name='test_solution')
+        entity = Entity.objects.create(solution=sln, name='test_entity')
+        app = App.objects.create(solution=sln, name='test_app')
+
+        # act
+        entity_map = EntityMap.objects.create(app=app, entity=entity, name='test_map')
+
+        # assert
+        assert entity_map.fields.filter(field__name='id').count() == 1

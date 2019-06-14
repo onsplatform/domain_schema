@@ -10,6 +10,5 @@ class Command(BaseCommand):
         call_command('loaddata', './core/tests/fixtures/test_data.json')
         usina = models.Entity.objects.get(pk=1)
         migration = usina.make_migration()
-        __import__('ipdb').set_trace()
         apply_model_migration(migration.id)
 

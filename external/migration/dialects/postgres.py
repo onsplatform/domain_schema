@@ -7,7 +7,8 @@ CONSTRAINTS = {
     "primary_key": 'PRIMARY KEY',
     "required": 'NOT NULL',
     "references": 'REFERENCES {schema}.{table}({column})',
-    "default": 'DEFAULT {default}'
+    "default": 'DEFAULT {default}',
+    "size": "({size})"
 }
 
 
@@ -17,6 +18,7 @@ class PostgresCreateTableCommand(BaseCreateTableCommand):
     def _build_column(self, column):
         refs = None
         default = None
+        size = None
 
         if column.references:
             table, col = column.references
@@ -25,7 +27,10 @@ class PostgresCreateTableCommand(BaseCreateTableCommand):
         if column.default is not None:
             default = self.CONSTRAINTS['default'].format(default=column.default)
 
-        fields = [column.name, str(column.field_type), refs, default,
+        if column.size:
+            size = self.CONSTRAINTS['size'].format(size=column.size)
+
+        fields = [column.name, str(column.field_type), size, refs, default,
                   str.join(",", column.constraints)]
 
         return str.join(' ', filter(None, fields))

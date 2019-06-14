@@ -72,7 +72,8 @@ class Entity(models.Model):
         with transaction.atomic():
             super(Entity, self).save(*args, **kwargs)
             fields = [
-                Field(entity=self, name=f, field_type=t) for f, t in self.SCHEMA.items()
+                Field(entity=self, name=f, field_type=t)
+                for f, t in self.SCHEMA.items()
             ]
             Field.objects.bulk_create(fields)
 
@@ -199,6 +200,15 @@ class EntityMap(models.Model):
     app = models.ForeignKey(App, on_delete=models.CASCADE, related_name='maps')
     entity = models.ForeignKey(Entity, on_delete=models.CASCADE, related_name='maps')
     name = models.CharField(max_length=30)
+
+    def save(self, *args, **kwargs):
+        with transaction.atomic():
+            super(EntityMap, self).save(*args, **kwargs)
+            if not self.fields.filter(field__name='id').exists():
+                MappedField.objects.create(
+                    alias='id',
+                    field=self.entity.fields.get(name='id'),
+                    entity_map=self)
 
 
 class MappedField(models.Model):
