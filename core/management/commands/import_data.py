@@ -1,9 +1,8 @@
-from glob import glob
-from os import path
-from typing import List
 import yaml
 from django.core.management.base import BaseCommand
+
 from core.models import Entity, Solution, Field
+from core.utils import yaml_helper
 
 
 class Command(BaseCommand):
@@ -23,7 +22,7 @@ class Command(BaseCommand):
         """
         # open folder and list all yaml files within it.
         # TODO: refactor this to receive directory as a parameter
-        yaml_files = self.list_yaml_files('./core/management/commands/')
+        yaml_files = yaml_helper.list_files('./core/management/commands/')
 
         # make sure the solution is created or exists before creating new Entities
         sln = self.create_solution('SAGER')
@@ -33,7 +32,7 @@ class Command(BaseCommand):
             # for each file in folder...
             for file in yaml_files:
                 try:
-                    entity_name = ''
+                    entity_name: str = ''
                     fields = {}
                     my_entity = None
 
@@ -55,18 +54,16 @@ class Command(BaseCommand):
                         my_field.name = k
                         my_field.field_type = v[0]
                         my_field.entity = my_entity
-                        # myEntity.fields.add(myField)
                         my_field.save()
 
                 except OSError:
                     return "Program was not able to open file at given destination"
 
     @staticmethod
-    def create_solution(solution_name):
+    def create_solution(solution_name: str):
         """
         Creates a solution or returns a Solution object if it already exists.
         """
-
         # Delete all solution objects and recreate them
         Solution.objects.all().delete()
 
@@ -89,12 +86,3 @@ class Command(BaseCommand):
 
         current_entity = Entity.objects.get(**kwargs)
         return current_entity
-
-    @staticmethod
-    def list_yaml_files(filepath) -> List:
-        """ Returns a list of YAML files in a given path.
-        """
-        # check if path exists
-        if path.exists(filepath):
-            yamlFiles = glob(filepath + '*.yaml')
-            return yamlFiles
