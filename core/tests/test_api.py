@@ -97,6 +97,8 @@ class EntityMapTestCase(ModelAPITestCase):
 
         return {
             'name': 'test_map',
+            'app_id': self.requirements['app'].id,
+            'entity_id': self.requirements['entity'].id,
             'fields': [{
                 'field_id': field.id,
                 'alias': 'test_alias',

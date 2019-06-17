@@ -153,7 +153,6 @@ class Migration(models.Model):
         """
         creates entity table and history table.
         """
-        __import__('ipdb').set_trace()
         migration = DatabaseMigration(settings.MIGRATION_DIALECT)
         table = self._create_table(migration)
         history_table = self._create_history_table(migration)
