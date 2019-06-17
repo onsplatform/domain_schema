@@ -4,7 +4,9 @@ from typing import List
 
 
 def list_files(filepath: str) -> List:
-    """ Returns a list of YAML files in a given path. """
+    """ Returns a list of YAML files in a given path.
+    :rtype: List
+    """
     # check if path exists
     if path.exists(filepath):
         yaml_files = glob(filepath + '*.yaml')
