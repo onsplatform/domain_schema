@@ -16,7 +16,7 @@ class BaseTableManagementCommand:
 
 TableColumn = namedtuple(
         'TableColumn',
-        ['name', 'field_type', 'default', 'references', 'constraints', 'size', ])
+        ['name', 'field_type', 'default', 'references', 'constraints', 'precision', ])
 
 
 class BaseCreateTableCommand(BaseTableManagementCommand):
@@ -52,7 +52,7 @@ class BaseCreateTableCommand(BaseTableManagementCommand):
             field_type=field_type,
             default=constraints.pop('default', None),
             references=constraints.pop('references', None),
-            size=constraints.pop('size', 0),
+            precision=constraints.pop('precision', 0),
             constraints=[self.CONSTRAINTS.get(c) for c, v in constraints.items() if v]
         )
 

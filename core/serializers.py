@@ -104,7 +104,6 @@ class MapFilterSerializer(serializers.ModelSerializer):
 
 class MappedFieldSerializer(serializers.ModelSerializer):
     field_id = serializers.IntegerField(required=True, write_only=True)
-    # field_type = serializers.SlugRelatedField(slug_field='field_type', read_only=True)
     field_type = serializers.ReadOnlyField(source='field.field_type', read_only=True)
     column_name = serializers.ReadOnlyField(source='field.name', read_only=True)
 
@@ -122,12 +121,12 @@ class EntityMapSerializer(WritableNestedModelSerializer):
     app_id = serializers.IntegerField(required=True, write_only=True)
     entity_id = serializers.IntegerField(required=True, write_only=True)
     fields = MappedFieldSerializer(many=True)
-    filters = MapFilterSerializer(many=True)
-    model = EntityNestedSerializer(source='entity')
+    filters = MapFilterSerializer(many=True, required=False)
+    model = EntityNestedSerializer(source='entity', read_only=True)
 
     class Meta:
         model = models.EntityMap
-        fields = ('app_id', 'entity_id', 'model', 'fields', 'filters', )
+        fields = ('id', 'name', 'app_id', 'entity_id', 'model', 'fields', 'filters', )
 
         validators = [
             UniqueTogetherValidator(

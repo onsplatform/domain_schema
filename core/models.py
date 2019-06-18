@@ -158,8 +158,8 @@ class Migration(models.Model):
         history_table = self._create_history_table(migration)
 
         for field in self.fields.exclude(name__in=(Entity.SCHEMA.keys())):
-            table = table.with_column(field.name, field.field_type)
-            history_table = history_table.with_column(field.name, field.field_type)
+            table = table.with_column(field.name, field.field_type, precision=field.precision)
+            history_table = history_table.with_column(field.name, field.field_type, precision=field.precision)
 
         return table, history_table,
 
@@ -188,6 +188,7 @@ class Field(models.Model):
     name = models.CharField(max_length=50)
     entity = models.ForeignKey(Entity, on_delete=models.CASCADE, related_name='fields')
     migration = models.ForeignKey(Migration, on_delete=models.CASCADE, related_name='fields', null=True)
+    precision = models.IntegerField(null=True)
     field_type = models.CharField(
         max_length=12,
         choices=[(field, field.value) for field in FIELD_TYPES])

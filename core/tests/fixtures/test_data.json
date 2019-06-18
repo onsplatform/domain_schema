@@ -47,7 +47,8 @@
         "fields": {
             "name": "nome",
             "entity": 1,
-            "field_type": "char"
+            "field_type": "char",
+            "precision": 30 
         }
     },
     {
@@ -66,6 +67,15 @@
             "entity_map": 1,
             "field": 3,
             "alias": "nom"
+        }
+    },
+    {
+        "model": "core.mappedfield",
+        "pk": 2,
+        "fields": {
+            "entity_map": 1,
+            "field": 1,
+            "alias": "id"
         }
     },
     {
