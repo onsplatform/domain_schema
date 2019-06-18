@@ -10,6 +10,7 @@ pytest-django = "*"
 pyyaml = "*"
 pylint = "*"
 rope = "*"
+azure-devops = "*"
 
 [packages]
 djangorestframework = "==3.9.2"

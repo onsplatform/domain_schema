@@ -1,13 +1,12 @@
 from django.core.management.base import BaseCommand
 from core.models import EntityMap, MappedField, MapFilter, MapFilterParameter, Entity
 from core.utils import yaml_helper
-import yaml
+import yaml, json
 import typing
 
 
 class Mapping(BaseCommand):
     def handle(self, *args, **options):
-
 
         # open folder and list all yaml files within it.
         yaml_file = yaml_helper.list_files('d:/platform/domain_schema/core/management/commands/map.yaml')
