@@ -62,9 +62,7 @@ class Entity(models.Model):
 
     def build_table_name(self):
         if not self.table:
-            solution_name = self.solution.name[0:50].strip().lower()
-            entity_name = self.name[0:50].strip().lower()
-            self.table = f'{solution_name}_{entity_name}'
+            self.table = self.name[0:60].strip().lower()
 
     def save(self, *args, **kwargs):
         self.build_table_name()
