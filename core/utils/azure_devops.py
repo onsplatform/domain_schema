@@ -2,7 +2,8 @@ import requests
 import json
 import typing
 from requests.exceptions import HTTPError
-"TODO: if necessary, refactor this to use the Azure Devops libraries for python instead of direct API calls"
+"TODO: if necessary, refactor this to use the Azure Devops libraries for python instead of direct API calls."
+"TODO: optimize these api calls."
 
 
 class AzureDevops:
@@ -36,9 +37,9 @@ class AzureDevops:
             return all_git_repos
 
         # Get only the repos that are not forks and are not empty
-        git_repos = [repo for repo in all_git_repos if not repo.get('isFork') and repo.get('size') >= 512]
+        repo_list = [repo for repo in all_git_repos if not repo.get('isFork') and repo.get('size') >= 512]
 
-        return git_repos
+        return repo_list
 
     def get_app_name(self, repo_id: str, file='plataforma.json') -> typing.AnyStr:
         """
