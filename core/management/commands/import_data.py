@@ -65,17 +65,21 @@ class EntityLoader:
 
 class Command(BaseCommand):
     def add_arguments(self, parser):
-        parser.add_argument('target_path', type=str, help='Path containing yaml files to be imported.')
-        parser.add_argument('solution', type=str, help='Solution name.')
-        parser.add_argument('-c', '--clear_before_import', action='store_true', help='Delete existing solution before importing.')
+        parser.add_argument(
+            'target_path', type=str, help='Path containing yaml files to be imported.')
+        parser.add_argument(
+            'solution', type=str, help='Solution name.')
+        parser.add_argument(
+            '-c', '--clear_before_import', action='store_true', help='Delete existing solution before importing.')
 
     def parse_arguments(self, **options):
-        target_path = options.pop('target_path', ['.'])[0]
+        target_path = options.pop('target_path')
         clear_before_import = options.pop('clear_before_import')
-        solution_name = options.pop('solution', ['SAGER'])[0]
+        solution_name = options.pop('solution', 'SAGER')
         return target_path, clear_before_import, solution_name
 
     def handle(self, **options):
+        __import__('ipdb').set_trace()
         target_path, clear_before_import, solution_name = self.parse_arguments(**options)
 
         if not os.path.exists(target_path):
