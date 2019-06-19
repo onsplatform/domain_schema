@@ -67,3 +67,66 @@ class AzureDevops:
         :return: list of IDs extracted from the repository list.
         """
         return [item['id'] for item in repo_list]
+
+
+"""
+https://weo6dxvr6l6e557q3feya7ijqfxxxfmfyhnat4fnqxawouoydvdq@dev.azure.com/onsvsts/98eb6763-31af-4542-b1bf-36efe247bd5b/_apis/git/repositories/9c638fbe-34e9-4193-9b44-02f2e5c60797/blobs/8801b92e16baee07488211ef4e84f4daeecae3f2
+
+
+https://user:weo6dxvr6l6e557q3feya7ijqfxxxfmfyhnat4fnqxawouoydvdq@dev.azure.com/onsvsts/98eb6763-31af-4542-b1bf-36efe247bd5b/_apis/git/repositories/9c638fbe-34e9-4193-9b44-02f2e5c60797/items?path=/Mapa&api-version=5.0
+
+{
+    "objectId": "57c1095d8097af10eff593fa70f18b15cef987cb",
+    "gitObjectType": "tree",
+    "commitId": "f7af50022a220dd89d49c11a53d4dd1dbc01e861",
+    "path": "/Mapa",
+    "isFolder": true,
+    "url": "https://dev.azure.com/onsvsts/98eb6763-31af-4542-b1bf-36efe247bd5b/_apis/git/repositories/9c638fbe-34e9-4193-9b44-02f2e5c60797/items?path=%2FMapa&versionType=Branch&versionOptions=None",
+    "_links": {
+        "self": {
+            "href": "https://dev.azure.com/onsvsts/98eb6763-31af-4542-b1bf-36efe247bd5b/_apis/git/repositories/9c638fbe-34e9-4193-9b44-02f2e5c60797/items?path=%2FMapa&versionType=Branch&versionOptions=None"
+        },
+        "repository": {
+            "href": "https://dev.azure.com/onsvsts/98eb6763-31af-4542-b1bf-36efe247bd5b/_apis/git/repositories/9c638fbe-34e9-4193-9b44-02f2e5c60797"
+        },
+        "tree": {
+            "href": "https://dev.azure.com/onsvsts/98eb6763-31af-4542-b1bf-36efe247bd5b/_apis/git/repositories/9c638fbe-34e9-4193-9b44-02f2e5c60797/trees/57c1095d8097af10eff593fa70f18b15cef987cb"
+        }
+    }
+}
+
+
+
+https://user:weo6dxvr6l6e557q3feya7ijqfxxxfmfyhnat4fnqxawouoydvdq@dev.azure.com/onsvsts/98eb6763-31af-4542-b1bf-36efe247bd5b/_apis/git/repositories/9c638fbe-34e9-4193-9b44-02f2e5c60797/trees/57c1095d8097af10eff593fa70f18b15cef987cb
+
+{
+    "objectId": "57c1095d8097af10eff593fa70f18b15cef987cb",
+    "url": "https://dev.azure.com/onsvsts/98eb6763-31af-4542-b1bf-36efe247bd5b/_apis/git/repositories/9c638fbe-34e9-4193-9b44-02f2e5c60797/trees/57c1095d8097af10eff593fa70f18b15cef987cb",
+    "treeEntries": [
+        {
+            "objectId": "8801b92e16baee07488211ef4e84f4daeecae3f2",
+            "relativePath": "SAGER_Evento.map.yaml",
+            "mode": "100644",
+            "gitObjectType": "blob",
+            "url": "https://dev.azure.com/onsvsts/98eb6763-31af-4542-b1bf-36efe247bd5b/_apis/git/repositories/9c638fbe-34e9-4193-9b44-02f2e5c60797/blobs/8801b92e16baee07488211ef4e84f4daeecae3f2",
+            "size": 9572
+        }
+    ],
+    "size": 49,
+    "_links": {
+        "self": {
+            "href": "https://dev.azure.com/onsvsts/98eb6763-31af-4542-b1bf-36efe247bd5b/_apis/git/repositories/9c638fbe-34e9-4193-9b44-02f2e5c60797/trees/57c1095d8097af10eff593fa70f18b15cef987cb"
+        },
+        "repository": {
+            "href": "https://dev.azure.com/onsvsts/98eb6763-31af-4542-b1bf-36efe247bd5b/_apis/git/repositories/9c638fbe-34e9-4193-9b44-02f2e5c60797"
+        },
+        "treeEntries": {
+            "href": "https://dev.azure.com/onsvsts/98eb6763-31af-4542-b1bf-36efe247bd5b/_apis/git/repositories/9c638fbe-34e9-4193-9b44-02f2e5c60797/blobs/8801b92e16baee07488211ef4e84f4daeecae3f2"
+        }
+    }
+}
+
+
+
+
+"""
