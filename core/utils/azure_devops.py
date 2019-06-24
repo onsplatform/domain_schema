@@ -57,7 +57,7 @@ class AzureDevops:
         except Exception as error:
             return f"Something else happened: {error}"
 
-    def get_map_url(self, repo_id: str) -> typing.List:
+    def get_map_content(self, repo_id: str):
         """
         Find Yaml File and return its contents.
         :param repo_id:
@@ -71,7 +71,9 @@ class AzureDevops:
             tree_id = response.json()['objectId']
             file_list = self._list_tree_entries(repo_id, tree_id)
 
-            return [file['url'] for file in file_list]
+            # even if there is a list, get only the first file from it.
+            yaml_file = requests.get(file_list[0]['url'])
+            return yaml_file.content
 
     def _list_tree_entries(self, repo_id: str, tree_id: str) -> typing.List:
         """
