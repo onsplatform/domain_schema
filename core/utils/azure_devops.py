@@ -1,7 +1,6 @@
 import requests
 import typing
 from requests.exceptions import HTTPError
-"TODO: if necessary, refactor this to use the Azure Devops libraries for python instead of direct API calls."
 
 
 class AzureDevops:
@@ -57,6 +56,35 @@ class AzureDevops:
             return f"Error has occurred: {http_error}"
         except Exception as error:
             return f"Something else happened: {error}"
+
+    def get_map_url(self, repo_id: str) -> typing.List:
+        """
+        Find Yaml File and return its contents.
+        :param repo_id:
+        :return:
+        """
+        url = f"{self.host}/{repo_id}/items"
+        parameters = {'path': '/Mapa', 'api-version': '5.0'}
+        response = requests.get(url, params=parameters, auth=self.authentication)
+
+        if response.status_code == requests.codes.ok and response.json()['isFolder']:
+            tree_id = response.json()['objectId']
+            file_list = self._list_tree_entries(repo_id, tree_id)
+
+            return [file['url'] for file in file_list]
+
+    def _list_tree_entries(self, repo_id: str, tree_id: str) -> typing.List:
+        """
+        List the contents of the given folder (tree) for a project.
+        :param repo_id: repository id, which should be a universal id.
+        :param tree_id: tree id, which is a sha1 unique identification.
+        :return:
+        """
+        url = f"{self.host}/{repo_id}/trees/{tree_id}"
+        response = requests.get(url, auth=self.authentication)
+
+        if response.status_code == requests.codes.ok:
+            return response.json()['treeEntries']
 
     @staticmethod
     def list_repo_id(repo_list: list) -> typing.List:
