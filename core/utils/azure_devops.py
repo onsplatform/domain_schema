@@ -51,7 +51,7 @@ class AzureDevops:
         response = requests.get(url, params=parameters, auth=self.authentication)
         if response.status_code == requests.codes.ok:
             app_info = response.json()
-            if app_info.get('app') is not None:
+            if 'app' in app_info.keys():
                 return app_info['app']['name']
 
         return None
@@ -67,11 +67,11 @@ class AzureDevops:
         response = requests.get(url, params=parameters, auth=self.authentication)
 
         if response.status_code == requests.codes.ok and response.json()['isFolder']:
-            tree_id = response.json()['objectId']
+            tree_id = response.json().get('objectId')
             file_list = self._list_tree_entries(repo_id, tree_id)
 
             # even if there is a list, get only the first file from it.
-            yaml_file = requests.get(file_list[0]['url'])
+            yaml_file = requests.get(file_list[0]['url'], auth=self.authentication)
             return yaml_file.content
 
     def _list_tree_entries(self, repo_id: str, tree_id: str) -> typing.List:

@@ -1,5 +1,5 @@
 from django.core.management.base import BaseCommand
-from core.models import EntityMap, MappedField, MapFilter, MapFilterParameter, Entity
+from core.models import EntityMap, MappedField, MapFilter, MapFilterParameter, Entity, App
 from core.utils import yaml_helper, azure_devops as tfs
 import yaml
 
@@ -10,12 +10,21 @@ class Command(BaseCommand):
         # get a new project repository instance
         git_repos = tfs.AzureDevops('weo6dxvr6l6e557q3feya7ijqfxxxfmfyhnat4fnqxawouoydvdq', 'sager')
 
-        ids = git_repos.list_repo_id()
+        repository_id_list = git_repos.list_repo_id()
 
-        for item in ids:
-            import pdb; pdb.set_trace()
-            if git_repos.get_app_name(item) is not None:
-                print(git_repos.get_app_name(item))
+        for repo_id in repository_id_list:
+            # get App name from 'plataforma.json' in the root of the git repository.
+            app_name = git_repos.get_app_name(repo_id)
+            if app_name is not None:
+
+                print(f"========================== {app_name} ==========================")
+                yaml_map = yaml.load(git_repos.get_map_content(repo_id), Loader=yaml.FullLoader)
+                print(yaml_map)
+                # TODO: get or create sager solution
+                # TODO: get or create App (need App Id for EntityMap)
+                # TODO: get or create map
+
+
 
     @staticmethod
     def get_entity(entity_name: str):
