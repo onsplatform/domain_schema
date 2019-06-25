@@ -198,7 +198,7 @@ class EntityMap(models.Model):
     """
     app = models.ForeignKey(App, on_delete=models.CASCADE, related_name='maps')
     entity = models.ForeignKey(Entity, on_delete=models.CASCADE, related_name='maps')
-    name = models.CharField(max_length=30)
+    name = models.CharField(max_length=50)
 
     def save(self, *args, **kwargs):
         with transaction.atomic():
@@ -216,7 +216,7 @@ class MappedField(models.Model):
     """
     entity_map = models.ForeignKey(EntityMap, on_delete=models.CASCADE, related_name='fields')
     field = models.ForeignKey(Field, on_delete=models.CASCADE, related_name='mappings')
-    alias = models.CharField(max_length=30)
+    alias = models.CharField(max_length=50)
 
 
 class MapFilter(models.Model):
@@ -224,7 +224,7 @@ class MapFilter(models.Model):
     Map filter
     """
     map = models.ForeignKey(EntityMap, on_delete=models.CASCADE, related_name='filters')
-    name = models.CharField(max_length=30)
+    name = models.CharField(max_length=50)
     expression = models.TextField()
 
 
@@ -233,7 +233,7 @@ class MapFilterParameter(models.Model):
     Map filter parameter
     """
     filter = models.ForeignKey(MapFilter, on_delete=models.CASCADE, related_name='parameters')
-    name = models.CharField(max_length=30)
+    name = models.CharField(max_length=50)
     is_array = models.BooleanField(default=False)
 
 

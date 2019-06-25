@@ -1,6 +1,6 @@
 from django.core.management.base import BaseCommand
 from core.models import *
-from core.utils import yaml_helper, azure_devops as tfs
+from core.utils import azure_devops as tfs
 import yaml
 import re
 
@@ -18,10 +18,7 @@ class Command(BaseCommand):
             app_name = git_repos.get_app_name(repo_id)
             if app_name is not None:
                 print(f"========================== {app_name} ==========================")
-                import pdb; pdb.set_trace()
-
                 yaml_map = yaml.load(git_repos.get_map_content(repo_id), Loader=yaml.FullLoader)
-
                 # CREATE App
                 solution = Solution.objects.get(name='SAGER')
                 map_app, _ = App.objects.get_or_create(name=app_name, solution=solution)
@@ -35,52 +32,37 @@ class Command(BaseCommand):
                     entity_map, _ = EntityMap.objects.get_or_create(name=map_name, app=map_app, entity=map_entity)
 
                     # CREATE fields: loop through fields in yaml file
+                    # import pdb; pdb.set_trace()
                     fields = map_value.get('fields')
                     for field_key, field_value in fields.items():
-                        current_field = Field.objects.get(name=field_value)
+                        # import pdb; pdb.set_trace()
+                        current_field = Field.objects.get(name=field_value.get('column'), entity=map_entity)
+                        print(f"Field Key: {field_key}, Field Value: {field_value.get('column')}")
                         map_field, _ = MappedField.objects.get_or_create(entity_map=entity_map, field=current_field,
                                                                          alias=field_key)
-                        print(field_key, field_value)
 
                     # CREATE filters: loop through filters in yaml file
                     filters = map_value.get('filters')
-                    for filter_key, filter_value in filters.items():
-                        map_filter, _ = MapFilter.objects.get_or_create(map=entity_map, name=field_key,
-                                                                        expression=filter_value)
-                        regex = r"([:\$]\w+)"
-                        matches = re.finditer(regex, filter_value)
+                    if filters is not None:
+                        print(f"Filter items are: {filters.items()}")
+                        for filter_key, filter_value in filters.items():
+                            if filter_value is not None:
+                                map_filter, _ = MapFilter.objects.get_or_create(map=entity_map, name=field_key,
+                                                                                expression=filter_value)
 
-                        # for each match in the expression, create the appropriate parameter
-                        for _, match_value in enumerate(matches, start=1):
-                            array = match_value.group().startswith('$')
-                            field_parameter = match_value.group()[1:]
-                            MapFilterParameter.objects.get_or_create(filter=map_filter, name=field_parameter,
-                                                                     is_array=array)
-                        # CREATE filter parameters
+                                regex = r"([:\$]\w+)"
+                                matches = re.finditer(regex, filter_value)
 
-                        print(filter_key, filter_value)
+                                # CREATE filter parameters
+                                # for each match in the expression, create the appropriate parameter
+                                for _, match_value in enumerate(matches, start=1):
+                                    array = match_value.group().startswith('$')
+                                    field_parameter = match_value.group()[1:]
+                                    MapFilterParameter.objects.get_or_create(filter=map_filter, name=field_parameter,
+                                                                             is_array=array)
 
     @staticmethod
     def get_entity(entity_name: str):
         """ TODO: delete or refactor this! """
         # Get EntityMap or create it
         return Entity.objects.get(name=entity_name)
-
-"""
-
-
-        # if there are yaml files at path
-        if yaml_file:
-            with open(yaml_file, 'r', encoding='utf-8') as stream:
-                # load Yaml file stream
-                yaml_dict = yaml.load(stream, Loader=yaml.FullLoader)
-
-                # run through the dictionary to populate entities
-                for key, value in yaml_dict.items():
-                    entity = Entity.objects.get(value.get('model'))
-                    fields = value.get('fields')
-                    filters = value.get('filters')
-
-                    entity_map, _ = EntityMap.objects.all().get_or_create(name=key, entity=entity)
-"""
-
