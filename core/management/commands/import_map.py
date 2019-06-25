@@ -2,6 +2,7 @@ from django.core.management.base import BaseCommand
 from core.models import *
 from core.utils import yaml_helper, azure_devops as tfs
 import yaml
+import re
 
 
 class Command(BaseCommand):
@@ -33,7 +34,7 @@ class Command(BaseCommand):
                     # CREATE EntityMap needs: current app, model or entity and a name.
                     entity_map, _ = EntityMap.objects.get_or_create(name=map_name, app=map_app, entity=map_entity)
 
-                    # loop through fields
+                    # CREATE fields: loop through fields in yaml file
                     fields = map_value.get('fields')
                     for field_key, field_value in fields.items():
                         current_field = Field.objects.get(name=field_value)
@@ -41,11 +42,23 @@ class Command(BaseCommand):
                                                                          alias=field_key)
                         print(field_key, field_value)
 
-                    # loop through filters
+                    # CREATE filters: loop through filters in yaml file
                     filters = map_value.get('filters')
                     for filter_key, filter_value in filters.items():
-                        print(filter_key, filter_value)
+                        map_filter, _ = MapFilter.objects.get_or_create(map=entity_map, name=field_key,
+                                                                        expression=filter_value)
+                        regex = r"([:\$]\w+)"
+                        matches = re.finditer(regex, filter_value)
 
+                        # for each match in the expression, create the appropriate parameter
+                        for _, match_value in enumerate(matches, start=1):
+                            array = match_value.group().startswith('$')
+                            field_parameter = match_value.group()[1:]
+                            MapFilterParameter.objects.get_or_create(filter=map_filter, name=field_parameter,
+                                                                     is_array=array)
+                        # CREATE filter parameters
+
+                        print(filter_key, filter_value)
 
     @staticmethod
     def get_entity(entity_name: str):

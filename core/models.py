@@ -234,9 +234,7 @@ class MapFilterParameter(models.Model):
     """
     filter = models.ForeignKey(MapFilter, on_delete=models.CASCADE, related_name='parameters')
     name = models.CharField(max_length=30)
-    field_type = models.CharField(
-        max_length=12,
-        choices=[(field, field.value) for field in FIELD_TYPES])
+    is_array = models.BooleanField(default=False)
 
 
 class Branch(models.Model):
