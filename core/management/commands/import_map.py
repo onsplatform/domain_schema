@@ -1,5 +1,5 @@
 from django.core.management.base import BaseCommand
-from core.models import EntityMap, MappedField, MapFilter, MapFilterParameter, Entity, App
+from core.models import *
 from core.utils import yaml_helper, azure_devops as tfs
 import yaml
 
@@ -16,14 +16,35 @@ class Command(BaseCommand):
             # get App name from 'plataforma.json' in the root of the git repository.
             app_name = git_repos.get_app_name(repo_id)
             if app_name is not None:
-
                 print(f"========================== {app_name} ==========================")
-                yaml_map = yaml.load(git_repos.get_map_content(repo_id), Loader=yaml.FullLoader)
-                print(yaml_map)
-                # TODO: get or create sager solution
-                # TODO: get or create App (need App Id for EntityMap)
-                # TODO: get or create map
+                import pdb; pdb.set_trace()
 
+                yaml_map = yaml.load(git_repos.get_map_content(repo_id), Loader=yaml.FullLoader)
+
+                # CREATE App
+                solution = Solution.objects.get(name='SAGER')
+                map_app, _ = App.objects.get_or_create(name=app_name, solution=solution)
+
+                # loop through dictionary to create EntityMap(Agente)
+                for map_key, map_value in yaml_map.items():
+                    map_name = map_key
+                    map_entity = Entity.objects.get(name=map_value.get('model'))
+
+                    # CREATE EntityMap needs: current app, model or entity and a name.
+                    entity_map, _ = EntityMap.objects.get_or_create(name=map_name, app=map_app, entity=map_entity)
+
+                    # loop through fields
+                    fields = map_value.get('fields')
+                    for field_key, field_value in fields.items():
+                        current_field = Field.objects.get(name=field_value)
+                        map_field, _ = MappedField.objects.get_or_create(entity_map=entity_map, field=current_field,
+                                                                         alias=field_key)
+                        print(field_key, field_value)
+
+                    # loop through filters
+                    filters = map_value.get('filters')
+                    for filter_key, filter_value in filters.items():
+                        print(filter_key, filter_value)
 
 
     @staticmethod
