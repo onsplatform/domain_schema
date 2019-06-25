@@ -1,6 +1,5 @@
 import requests
 import typing
-from requests.exceptions import HTTPError
 
 
 class AzureDevops:
@@ -95,11 +94,3 @@ class AzureDevops:
         """
         repo_list = self.list_repos()
         return [item['id'] for item in repo_list]
-
-
-"""
-        except HTTPError as http_error:
-            return f"Error has occurred: {http_error}"
-        except Exception as error:
-            return f"Something else happened: {error}"
-"""
