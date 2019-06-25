@@ -1,15 +1,30 @@
 from django.core.management.base import BaseCommand
 from core.models import EntityMap, MappedField, MapFilter, MapFilterParameter, Entity
-from core.utils import yaml_helper
-import yaml, json
-import typing
+from core.utils import yaml_helper, azure_devops as tfs
+import yaml
 
 
-class Mapping(BaseCommand):
+class Command(BaseCommand):
     def handle(self, *args, **options):
 
-        # open folder and list all yaml files within it.
-        yaml_file = yaml_helper.list_files('d:/platform/domain_schema/core/management/commands/map.yaml')
+        # get a new project repository instance
+        git_repos = tfs.AzureDevops('weo6dxvr6l6e557q3feya7ijqfxxxfmfyhnat4fnqxawouoydvdq', 'sager')
+
+        ids = git_repos.list_repo_id()
+
+        for item in ids:
+            import pdb; pdb.set_trace()
+            if git_repos.get_app_name(item) is not None:
+                print(git_repos.get_app_name(item))
+
+    @staticmethod
+    def get_entity(entity_name: str):
+        """ TODO: delete or refactor this! """
+        # Get EntityMap or create it
+        return Entity.objects.get(name=entity_name)
+
+"""
+
 
         # if there are yaml files at path
         if yaml_file:
@@ -24,13 +39,5 @@ class Mapping(BaseCommand):
                     filters = value.get('filters')
 
                     entity_map, _ = EntityMap.objects.all().get_or_create(name=key, entity=entity)
+"""
 
-
-
-        return None
-
-    @staticmethod
-    def get_entity(entity_name: str):
-        """ TODO: delete or refactor this! """
-        # Get EntityMap or create it
-        return Entity.objects.get(name=entity_name)

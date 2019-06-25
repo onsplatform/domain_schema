@@ -35,11 +35,11 @@ class AzureDevops:
                 return all_git_repos
 
             # Get only the repos that are not forks and are not empty
-            repo_list = [repo for repo in all_git_repos if not repo.get('isFork') and repo.get('size') >= 512]
+            repo_list = [repo for repo in all_git_repos if not repo.get('isFork') and repo.get('size') > 1024]
 
             return repo_list
 
-    def get_app_name(self, repo_id: str, file='plataforma.json') -> typing.AnyStr:
+    def get_app_name(self, repo_id: str, file='plataforma.json'):
         """
         Returns a string containing the app name inside the given configuration file. Default is plataforma.json.
         :param repo_id: this is the unique repository identification.
@@ -48,14 +48,14 @@ class AzureDevops:
         """
         url = f"{self.host}/{repo_id}/items"
         parameters = ({'path': f'{file}', 'api-version': '5.0'})
-        try:
-            response = requests.get(url, params=parameters, auth=self.authentication)
+
+        response = requests.get(url, params=parameters, auth=self.authentication)
+        if response.status_code == requests.codes.ok:
             app_info = response.json()
-            return app_info['app']['name']
-        except HTTPError as http_error:
-            return f"Error has occurred: {http_error}"
-        except Exception as error:
-            return f"Something else happened: {error}"
+            if app_info.get('app') is not None:
+                return app_info['app']['name']
+
+        return None
 
     def get_map_content(self, repo_id: str):
         """
@@ -88,11 +88,18 @@ class AzureDevops:
         if response.status_code == requests.codes.ok:
             return response.json()['treeEntries']
 
-    @staticmethod
-    def list_repo_id(repo_list: list) -> typing.List:
+    def list_repo_id(self) -> typing.List:
         """
         Returns a list of IDs of the repos, necessary to access files
-        :param repo_list: (list) expects a list of git repositories inside a project.
         :return: list of IDs extracted from the repository list.
         """
+        repo_list = self.list_repos()
         return [item['id'] for item in repo_list]
+
+
+"""
+        except HTTPError as http_error:
+            return f"Error has occurred: {http_error}"
+        except Exception as error:
+            return f"Something else happened: {error}"
+"""
