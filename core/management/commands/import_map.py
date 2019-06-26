@@ -3,7 +3,7 @@ from core.models import *
 from core.utils import azure_devops as tfs
 import yaml
 import re
-
+from django.db import transaction
 
 class Command(BaseCommand):
     def handle(self, *args, **options):
@@ -21,18 +21,20 @@ class Command(BaseCommand):
                 yaml_map = yaml.load(git_repos.get_map_content(repo_id), Loader=yaml.FullLoader)
                 # CREATE App
                 solution = Solution.objects.get(name='SAGER')
-                map_app, _ = App.objects.get_or_create(name=app_name, solution=solution)
 
-                # loop through dictionary to create EntityMap(Agente)
-                for map_key, map_value in yaml_map.items():
-                    map_name = map_key
-                    map_entity = Entity.objects.get(name=map_value.get('model'))
+                with transaction.atomic():
+                    map_app, _ = App.objects.get_or_create(name=app_name, solution=solution)
 
-                    # CREATE EntityMap needs: current app, model or entity and a name.
-                    entity_map, _ = EntityMap.objects.get_or_create(name=map_name, app=map_app, entity=map_entity)
+                    # loop through dictionary to create EntityMap(Agente)
+                    for map_key, map_value in yaml_map.items():
+                        map_name = map_key
+                        map_entity = Entity.objects.get(name=map_value.get('model'))
 
-                    # CREATE fields: loop through fields in yaml file
-                    self.create_fields(entity_map, map_entity, map_value)
+                        # CREATE EntityMap needs: current app, model or entity and a name.
+                        entity_map, _ = EntityMap.objects.get_or_create(name=map_name, app=map_app, entity=map_entity)
+
+                        # CREATE fields: loop through fields in yaml file
+                        self.create_fields(entity_map, map_entity, map_value)
 
     def create_fields(self, entity_map, map_entity, map_value):
         fields = map_value.get('fields')
