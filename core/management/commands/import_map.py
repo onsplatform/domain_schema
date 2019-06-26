@@ -32,34 +32,40 @@ class Command(BaseCommand):
                     entity_map, _ = EntityMap.objects.get_or_create(name=map_name, app=map_app, entity=map_entity)
 
                     # CREATE fields: loop through fields in yaml file
-                    # import pdb; pdb.set_trace()
                     fields = map_value.get('fields')
                     for field_key, field_value in fields.items():
                         # import pdb; pdb.set_trace()
-                        current_field = Field.objects.get(name=field_value.get('column'), entity=map_entity)
-                        print(f"Field Key: {field_key}, Field Value: {field_value.get('column')}")
-                        map_field, _ = MappedField.objects.get_or_create(entity_map=entity_map, field=current_field,
-                                                                         alias=field_key)
+                        current_field, created = Field.objects.get_or_create(name=field_value.get('column'),
+                                                                             entity=map_entity)
 
-                    # CREATE filters: loop through filters in yaml file
-                    filters = map_value.get('filters')
-                    if filters is not None:
-                        print(f"Filter items are: {filters.items()}")
-                        for filter_key, filter_value in filters.items():
-                            if filter_value is not None:
-                                map_filter, _ = MapFilter.objects.get_or_create(map=entity_map, name=field_key,
-                                                                                expression=filter_value)
+                        if not created:
+                            print(f"Field Key: {field_key}, Field Value: {field_value.get('column')}")
+                            map_field, _ = MappedField.objects.get_or_create(entity_map=entity_map, field=current_field,
+                                                                             alias=field_key)
 
-                                regex = r"([:\$]\w+)"
-                                matches = re.finditer(regex, filter_value)
+                            # CREATE filters: loop through filters in yaml file
+                            self.create_filters(entity_map, field_key, map_value)
 
-                                # CREATE filter parameters
-                                # for each match in the expression, create the appropriate parameter
-                                for _, match_value in enumerate(matches, start=1):
-                                    array = match_value.group().startswith('$')
-                                    field_parameter = match_value.group()[1:]
-                                    MapFilterParameter.objects.get_or_create(filter=map_filter, name=field_parameter,
-                                                                             is_array=array)
+    def create_filters(self, entity_map, field_key, map_value):
+        filters = map_value.get('filters')
+        if filters is not None:
+            for filter_key, filter_value in filters.items():
+                if filter_value is not None:
+                    map_filter, _ = MapFilter.objects.get_or_create(map=entity_map, name=field_key,
+                                                                    expression=filter_value)
+                    # CREATE filter parameters
+                    self.create_filter_parameters(filter_value, map_filter)
+
+    @staticmethod
+    def create_filter_parameters(filter_value, map_filter):
+        regex = r"([:\$]\w+)"
+        matches = re.finditer(regex, filter_value)
+
+        # for each match in the expression, create the appropriate parameter
+        for _, match_value in enumerate(matches, start=1):
+            array = match_value.group().startswith('$')
+            field_parameter = match_value.group()[1:]
+            MapFilterParameter.objects.get_or_create(filter=map_filter, name=field_parameter, is_array=array)
 
     @staticmethod
     def get_entity(entity_name: str):
