@@ -32,19 +32,21 @@ class Command(BaseCommand):
                     entity_map, _ = EntityMap.objects.get_or_create(name=map_name, app=map_app, entity=map_entity)
 
                     # CREATE fields: loop through fields in yaml file
-                    fields = map_value.get('fields')
-                    for field_key, field_value in fields.items():
-                        # import pdb; pdb.set_trace()
-                        current_field, created = Field.objects.get_or_create(name=field_value.get('column'),
-                                                                             entity=map_entity)
+                    self.create_fields(entity_map, map_entity, map_value)
 
-                        if not created:
-                            print(f"Field Key: {field_key}, Field Value: {field_value.get('column')}")
-                            map_field, _ = MappedField.objects.get_or_create(entity_map=entity_map, field=current_field,
-                                                                             alias=field_key)
+    def create_fields(self, entity_map, map_entity, map_value):
+        fields = map_value.get('fields')
+        for field_key, field_value in fields.items():
+            # import pdb; pdb.set_trace()
+            current_field, created = Field.objects.get_or_create(name=field_value.get('column'), entity=map_entity)
 
-                            # CREATE filters: loop through filters in yaml file
-                            self.create_filters(entity_map, field_key, map_value)
+            if not created:
+                print(f"Field Key: {field_key}, Field Value: {field_value.get('column')}")
+                map_field, _ = MappedField.objects.get_or_create(entity_map=entity_map, field=current_field,
+                                                                 alias=field_key)
+
+                # CREATE filters: loop through filters in yaml file
+                self.create_filters(entity_map, field_key, map_value)
 
     def create_filters(self, entity_map, field_key, map_value):
         filters = map_value.get('filters')
