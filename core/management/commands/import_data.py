@@ -14,7 +14,8 @@ from core.tasks import apply_model_migration
 
 class EntityLoader:
     MAP_TYPES = {
-        "string": FIELD_TYPES.CHAR,
+        "string": FIELD_TYPES.VARCHAR,
+        "text": FIELD_TYPES.TEXT,
         "integer": FIELD_TYPES.INTEGER,
         "date": FIELD_TYPES.DATE,
         "datetime": FIELD_TYPES.DATE,
@@ -32,7 +33,7 @@ class EntityLoader:
             field_type= self.MAP_TYPES[v[0]]
             field = Field(entity=entity, name=k, field_type=field_type)
             if field_type == self.MAP_TYPES['string']:
-                field.precision = 50
+                field.precision = 200
             yield field
 
     def create_entity(self, source_file, solution):
@@ -79,7 +80,6 @@ class Command(BaseCommand):
         return target_path, clear_before_import, solution_name
 
     def handle(self, **options):
-        __import__('ipdb').set_trace()
         target_path, clear_before_import, solution_name = self.parse_arguments(**options)
 
         if not os.path.exists(target_path):

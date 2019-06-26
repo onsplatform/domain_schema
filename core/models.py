@@ -10,6 +10,8 @@ from external.migration import DatabaseMigration
 
 class FIELD_TYPES(Enum):   # A subclass of Enum
     CHAR = "char"
+    VARCHAR = "varchar"
+    TEXT = "text"
     BOOLEAN = "bool"
     INTEGER = 'int'
     DECIMAL = 'dec'
