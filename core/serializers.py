@@ -77,11 +77,9 @@ class EntitySerializer(WritableNestedModelSerializer):
 
 
 class MapFilterParameterSerializer(serializers.ModelSerializer):
-    field_type = serializers.CharField()
-
     class Meta:
         model = models.MapFilterParameter
-        fields = ('name', 'field_type', )
+        fields = ('name', 'is_array', )
         validators = [
             UniqueTogetherValidator(
                 queryset=models.MapFilterParameter.objects.all(),
