@@ -11,6 +11,7 @@ pyyaml = "*"
 pylint = "*"
 rope = "*"
 azure-devops = "*"
+requests = "*"
 
 [packages]
 djangorestframework = "==3.9.2"
