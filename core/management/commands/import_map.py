@@ -5,6 +5,7 @@ import yaml
 import re
 from django.db import transaction
 
+
 class Command(BaseCommand):
     def handle(self, *args, **options):
 
@@ -55,9 +56,10 @@ class Command(BaseCommand):
         if filters is not None:
             for filter_key, filter_value in filters.items():
                 if filter_value is not None:
+                    # Get or Create a map_filter
                     map_filter, _ = MapFilter.objects.get_or_create(map=entity_map, name=field_key,
                                                                     expression=filter_value)
-                    # CREATE filter parameters
+                    # Proceed to obtain and persist the parameters.
                     self.create_filter_parameters(filter_value, map_filter)
 
     @staticmethod
