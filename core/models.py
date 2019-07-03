@@ -34,9 +34,14 @@ class App(models.Model):
     """
     app model
     """
-    name = models.CharField(max_length=30)
     solution = models.ForeignKey(Solution, on_delete=models.CASCADE, related_name='apps')
+    name = models.CharField(max_length=30)
 
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["solution", "name"], name='unique_solution_app')
+        ]
 
 class Entity(models.Model):
     """
@@ -45,6 +50,12 @@ class Entity(models.Model):
     solution = models.ForeignKey(Solution, on_delete=models.CASCADE, related_name='entities')
     name = models.CharField(max_length=50)
     table = models.CharField(max_length=50, unique=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["solution", "name"], name='unique_solution_entity')
+        ]
 
     SCHEMA = {
         'id': FIELD_TYPES.INTEGER,
@@ -193,6 +204,11 @@ class Field(models.Model):
         max_length=12,
         choices=[(field, field.value) for field in FIELD_TYPES])
 
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["entity", "name"], name='unique_entity_field')
+        ]
 
 class EntityMap(models.Model):
     """
@@ -201,6 +217,9 @@ class EntityMap(models.Model):
     app = models.ForeignKey(App, on_delete=models.CASCADE, related_name='maps')
     entity = models.ForeignKey(Entity, on_delete=models.CASCADE, related_name='maps')
     name = models.CharField(max_length=50)
+
+    class Meta:
+        unique_together = (("app", "name"),)
 
     def save(self, *args, **kwargs):
         with transaction.atomic():
@@ -220,6 +239,14 @@ class MappedField(models.Model):
     field = models.ForeignKey(Field, on_delete=models.CASCADE, related_name='mappings')
     alias = models.CharField(max_length=50)
 
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["entity_map", "field"], name='unique_map_field'),
+            models.UniqueConstraint(
+                fields=["entity_map", "alias"], name='unique_map_alias'),
+        ]
+
 
 class MapFilter(models.Model):
     """
@@ -228,6 +255,12 @@ class MapFilter(models.Model):
     map = models.ForeignKey(EntityMap, on_delete=models.CASCADE, related_name='filters')
     name = models.CharField(max_length=50)
     expression = models.TextField()
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["map", "name"], name='unique_map_filter'),
+        ]
 
 
 class MapFilterParameter(models.Model):
@@ -238,6 +271,12 @@ class MapFilterParameter(models.Model):
     name = models.CharField(max_length=50)
     is_array = models.BooleanField(default=False)
 
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["filter", "name"], name='unique_filter_parameter'),
+        ]
+
 
 class Branch(models.Model):
     """
@@ -247,3 +286,8 @@ class Branch(models.Model):
     solution = models.ForeignKey(Solution, on_delete=models.CASCADE, related_name='branches')
     name = models.CharField(max_length=30)
 
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["solution", "name"], name='unique_solution_branch'),
+        ]
