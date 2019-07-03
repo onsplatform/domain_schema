@@ -37,3 +37,13 @@ class EntityMapView(viewsets.ModelViewSet):
     """
     serializer_class = EntityMapSerializer
     queryset = EntityMap.objects.all().order_by('name')
+
+    def get_queryset(self):
+        app_name = self.kwargs.get('app_name')
+        map_name = self.kwargs.get('map_name')
+
+        if app_name and map_name:
+            return EntityMap.objects.filter(app__name=app_name, name=map_name)
+
+        return EntityMap.objects.all()
+

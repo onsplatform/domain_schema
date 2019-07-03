@@ -10,6 +10,7 @@ router = routers.SimpleRouter()
 router.register('solution', SolutionView)
 router.register('app', AppView)
 router.register('entity', EntityView)
-router.register('entitymap', EntityMapView)
+router.register('entitymap', EntityMapView),
+router.register('entitymap/(?P<app_name>.+)/(?P<map_name>.+)', EntityMapView),
 
 
