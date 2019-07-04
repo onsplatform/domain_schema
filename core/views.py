@@ -1,4 +1,6 @@
 from rest_framework import viewsets
+from rest_framework.decorators import action
+from rest_framework.response import Response
 
 from core.models import Solution, App, Entity, EntityMap
 from core.serializers import SolutionSerializer, AppSerializer, EntitySerializer, EntityMapSerializer
@@ -38,12 +40,11 @@ class EntityMapView(viewsets.ModelViewSet):
     serializer_class = EntityMapSerializer
     queryset = EntityMap.objects.all().order_by('name')
 
-    def get_queryset(self):
+    @action(detail=True)
+    def map_by_name(self, request, *args, **kwargs):
+        __import__('ipdb').set_trace()
         app_name = self.kwargs.get('app_name')
         map_name = self.kwargs.get('map_name')
-
-        if app_name and map_name:
-            return EntityMap.objects.filter(app__name=app_name, name=map_name)
-
-        return EntityMap.objects.all()
+        entity_map = EntityMap.objects.filter(app__name=app_name, name=map_name)
+        return Response(entity_map)
 
