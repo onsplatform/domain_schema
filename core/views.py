@@ -44,7 +44,6 @@ class EntityMapView(viewsets.ModelViewSet):
         app_name = self.kwargs.get('app_name')
         map_name = self.kwargs.get('map_name')
 
-        __import__('ipdb').set_trace()
         if app_name and map_name:
             return EntityMap.objects.filter(app__name=app_name, name=map_name)
 
