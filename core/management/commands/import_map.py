@@ -41,26 +41,25 @@ class Command(BaseCommand):
                         # CREATE filters: loop through filters in yaml file
                         self.create_filters(entity_map, map_value.get('filters', {}))
 
-    def create_fields(self, entity_map, map_entity, map_value):
-
+    @staticmethod
+    def create_fields(entity_map, map_entity, map_value):
         for field_key, field_value in map_value.items():
-            print(f"Entidate: {entity_map.name} == Field Key: {field_key}, Field Value: {field_value.get('column')}")
+            print(f"Entidade: {entity_map.name} == Field Key: {field_key}, Field Value: {field_value.get('column')}")
             current_field = Field.objects.filter(name=field_value.get('column'), entity=map_entity).first()
 
             if not current_field:
                 print(f"Field {field_key} not found in {entity_map.name}. Ignoring...")
                 continue
-
             map_field, _ = MappedField.objects.get_or_create(entity_map=entity_map, field=current_field,
-                                                                 alias=field_key)
+                                                             alias=field_key)
 
     def create_filters(self, entity_map, map_value):
-
         for filter_key, filter_value in map_value.items():
             if filter_value:
                 # Get or Create a map_filter
                 map_filter, _ = MapFilter.objects.get_or_create(map=entity_map, name=filter_key,
                                                                 expression=filter_value)
+
                 # Proceed to obtain and persist the parameters.
                 self.create_filter_parameters(filter_value, map_filter)
 
