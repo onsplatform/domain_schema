@@ -56,6 +56,22 @@ class AzureDevops:
 
         return None
 
+    def get_app_name_from_yaml(self, repo_id: str):
+        """
+        Extracts app name from Yaml file name.
+        :return:
+        """
+        url = f"{self.host}/{repo_id}/items"
+        parameters = {'path': '/Mapa', 'api-version': '5.0'}
+        response = requests.get(url, params=parameters, auth=self.authentication)
+
+        if response.status_code == requests.codes.ok and response.json()['isFolder']:
+            tree_id = response.json().get('objectId')
+            file_list = self._list_tree_entries(repo_id, tree_id)
+            # from the entries, get the filename, located at 'relativePath' (SAGER_Evento.map.yaml)
+            file_name: str = file_list[0]['relativePath']
+            return file_name.partition('.')[0]
+
     def get_map_content(self, repo_id: str):
         """
         Find Yaml File and return its contents.
@@ -85,7 +101,7 @@ class AzureDevops:
         response = requests.get(url, auth=self.authentication)
 
         if response.status_code == requests.codes.ok:
-            return response.json()['treeEntries']
+            return response.json().get('treeEntries')
 
     def list_repo_id(self) -> typing.List:
         """
