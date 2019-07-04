@@ -40,11 +40,12 @@ class EntityMapView(viewsets.ModelViewSet):
     serializer_class = EntityMapSerializer
     queryset = EntityMap.objects.all().order_by('name')
 
-    @action(detail=True)
-    def map_by_name(self, request, *args, **kwargs):
-        __import__('ipdb').set_trace()
+    def get_queryset(self, *args, **kwargs):
         app_name = self.kwargs.get('app_name')
         map_name = self.kwargs.get('map_name')
-        entity_map = EntityMap.objects.filter(app__name=app_name, name=map_name)
-        return Response(entity_map)
 
+        __import__('ipdb').set_trace()
+        if app_name and map_name:
+            return EntityMap.objects.filter(app__name=app_name, name=map_name)
+
+        return EntityMap.objects.all()
