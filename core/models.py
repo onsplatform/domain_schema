@@ -58,7 +58,7 @@ class Entity(models.Model):
         ]
 
     SCHEMA = {
-        'id': FIELD_TYPES.INTEGER,
+        'id': FIELD_TYPES.UUID,
         'date_created': FIELD_TYPES.DATE,
         'branch': FIELD_TYPES.UUID,
     }
