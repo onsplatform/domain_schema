@@ -10,7 +10,7 @@ pytest-django = "*"
 pyyaml = "*"
 pylint = "*"
 rope = "*"
-azure-devops = "*"
+azure-devops = "==5.0.0b9"
 requests = "*"
 
 [packages]
@@ -20,6 +20,8 @@ Django = "==2.2"
 psycopg2-binary = "*"
 celery = "*"
 django-celery-results = "*"
+azure-devops = "*"
+django-rest-swagger = "*"
 
 [requires]
 python_version = "3.7"

@@ -21,4 +21,4 @@ def base_uri(request):
     Ex.: MyModelTestCase will be wired to mymodel, so on, /api/mymodel.
     """
     uri_name = request.cls.__name__.replace('TestCase','').lower()
-    request.cls.base_uri = f'/api/{uri_name}/'
+    request.cls.base_uri = f'/api/v1/{uri_name}/'

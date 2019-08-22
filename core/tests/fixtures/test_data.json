@@ -92,8 +92,7 @@
         "pk": 1,
         "fields": {
             "filter": 1,
-            "name": "nome",
-            "field_type": "char"
+            "name": "nome"
         }
     }
 ]
