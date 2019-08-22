@@ -43,6 +43,7 @@ class App(models.Model):
                 fields=["solution", "name"], name='unique_solution_app')
         ]
 
+
 class Entity(models.Model):
     """
     Entity model. This is the Entity that will be used in the solution. (USINA)
@@ -61,6 +62,7 @@ class Entity(models.Model):
         'id': FIELD_TYPES.UUID,
         'date_created': FIELD_TYPES.DATE,
         'branch': FIELD_TYPES.UUID,
+
     }
 
     def make_migration(self):
@@ -132,6 +134,19 @@ class Migration(models.Model):
             ).with_column(
                 name='branch',
                 field_type=FIELD_TYPES.UUID,
+            ).with_column(
+                name='deleted',
+                field_type=FIELD_TYPES.BOOLEAN,
+                default=False
+            ).with_column(
+                name='meta_instance_id',
+                field_type=FIELD_TYPES.UUID
+            ).with_column(
+                name='modified',
+                field_type=FIELD_TYPES.DATE,
+            ).with_column(
+                name='from_id',
+                field_type=FIELD_TYPES.UUID,
             )
 
     def _create_table(self, migration):
@@ -157,6 +172,19 @@ class Migration(models.Model):
                 default='NOW()'
             ).with_column(
                 name='branch',
+                field_type=FIELD_TYPES.UUID,
+            ).with_column(
+                name='deleted',
+                field_type=FIELD_TYPES.BOOLEAN,
+                default=False
+            ).with_column(
+                name='meta_instance_id',
+                field_type=FIELD_TYPES.UUID
+            ).with_column(
+                name='modified',
+                field_type=FIELD_TYPES.DATE,
+            ).with_column(
+                name='from_id',
                 field_type=FIELD_TYPES.UUID,
             )
 
@@ -209,6 +237,7 @@ class Field(models.Model):
             models.UniqueConstraint(
                 fields=["entity", "name"], name='unique_entity_field')
         ]
+
 
 class EntityMap(models.Model):
     """

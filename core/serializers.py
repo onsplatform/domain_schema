@@ -116,7 +116,7 @@ class EntityMapSerializer(WritableNestedModelSerializer):
             model = models.Entity
             fields = ('name', 'table',)
 
-   # app_id = serializers.IntegerField(required=True, write_only=True)
+    # app_id = serializers.IntegerField(required=True, write_only=True)
     app_id = serializers.IntegerField(required=True)
     entity_id = serializers.IntegerField(required=True, write_only=True)
     fields = MappedFieldSerializer(many=True)
