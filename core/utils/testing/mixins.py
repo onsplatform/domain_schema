@@ -53,6 +53,7 @@ class ModelAPIUpdateTestMixin:
 
     def test_update_resource(self):
         # mock
+        # __import__('ipdb').set_trace()
         resource = self.build()
         update_data = self.update_data()
         obj_data = {

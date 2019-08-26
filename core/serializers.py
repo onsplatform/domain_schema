@@ -4,7 +4,7 @@ from rest_framework.validators import UniqueValidator, UniqueTogetherValidator
 
 from drf_writable_nested import WritableNestedModelSerializer
 
-from core import models, queue
+from core import models
 from external import migration
 
 
@@ -68,6 +68,7 @@ class EntitySerializer(WritableNestedModelSerializer):
         ]
 
     def save(self, **kwargs):
+        # __import__('ipdb').set_trace()
         instance = super(WritableNestedModelSerializer, self).save(**kwargs)
         migration = instance.make_migration()
 
