@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from rest_framework.fields import SerializerMethodField
 from rest_framework.validators import UniqueValidator, UniqueTogetherValidator
 
 from drf_writable_nested import WritableNestedModelSerializer
@@ -30,7 +31,7 @@ class AppSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = models.App
-        fields = ('id', 'name', 'solution_id', )
+        fields = ('id', 'name', 'solution_id',)
         validators = [
             UniqueTogetherValidator(
                 queryset=models.App.objects.all(),
@@ -59,7 +60,7 @@ class EntitySerializer(WritableNestedModelSerializer):
 
     class Meta:
         model = models.Entity
-        fields = ('id', 'solution_id', 'name', 'fields', 'table',  )
+        fields = ('id', 'solution_id', 'name', 'fields', 'table',)
         validators = [
             UniqueTogetherValidator(
                 queryset=models.Entity.objects.all(),
@@ -79,11 +80,11 @@ class EntitySerializer(WritableNestedModelSerializer):
 class MapFilterParameterSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.MapFilterParameter
-        fields = ('name', 'is_array', )
+        fields = ('name', 'is_array',)
         validators = [
             UniqueTogetherValidator(
                 queryset=models.MapFilterParameter.objects.all(),
-                fields=('filter_id', 'name', ))
+                fields=('filter_id', 'name',))
         ]
 
 
@@ -92,7 +93,7 @@ class MapFilterSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = models.MapFilter
-        fields = ('name', 'expression', 'parameters', )
+        fields = ('name', 'expression', 'parameters',)
         validators = [
             UniqueTogetherValidator(
                 queryset=models.MapFilter.objects.all(),
@@ -107,7 +108,12 @@ class MappedFieldSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = models.MappedField
-        fields = ('field_id', 'field_type', 'column_name', 'alias', )
+        fields = ('field_id', 'field_type', 'column_name', 'alias',)
+
+
+
+
+
 
 
 class EntityMapSerializer(WritableNestedModelSerializer):
@@ -116,16 +122,26 @@ class EntityMapSerializer(WritableNestedModelSerializer):
             model = models.Entity
             fields = ('name', 'table',)
 
+    def get_metadata(self, obj):
+        return [
+            {'field_type': str(models.FIELD_TYPES.BOOLEAN), 'column_name': 'deleted', 'alias': 'deleted'},
+            {'field_type': str(models.FIELD_TYPES.VARCHAR), 'column_name': 'meta_instance_id', 'alias': 'instance_id'},
+            {'field_type': str(models.FIELD_TYPES.DATE), 'column_name': 'modified', 'alias': 'modified_at'},
+            {'field_type': str(models.FIELD_TYPES.VARCHAR), 'column_name': 'from_id', 'alias': 'from_id'},
+            {'field_type': str(models.FIELD_TYPES.VARCHAR), 'column_name': 'branch', 'alias': 'branch'}
+        ]
+
     # app_id = serializers.IntegerField(required=True, write_only=True)
     app_id = serializers.IntegerField(required=True)
     entity_id = serializers.IntegerField(required=True, write_only=True)
     fields = MappedFieldSerializer(many=True)
+    metadata = SerializerMethodField()
     filters = MapFilterSerializer(many=True, required=False)
     model = EntityNestedSerializer(source='entity', read_only=True)
 
     class Meta:
         model = models.EntityMap
-        fields = ('id', 'name', 'app_id', 'entity_id', 'model', 'fields', 'filters', )
+        fields = ('id', 'name', 'app_id', 'entity_id', 'model', 'fields', 'metadata', 'filters',)
 
         validators = [
             UniqueTogetherValidator(
