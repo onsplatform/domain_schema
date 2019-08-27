@@ -8,7 +8,7 @@ from django.conf import settings
 from external.migration import DatabaseMigration
 
 
-class FIELD_TYPES(Enum):   # A subclass of Enum
+class FIELD_TYPES(Enum):  # A subclass of Enum
     CHAR = "char"
     VARCHAR = "varchar"
     TEXT = "text"
@@ -116,38 +116,38 @@ class Migration(models.Model):
             - uuid foreign key named id referencing the entity itself,
             - date_created to keep the version creation date.
         """
-        return migration.create_table(self.history_table, 'entities')\
+        return migration.create_table(self.history_table, 'entities') \
             .with_column(
-                name='version_id',
-                field_type=FIELD_TYPES.UUID,
-                primary_key=True,
-                default='uuid_generate_v4()'
-            ).with_column(
-                name='id',
-                field_type=FIELD_TYPES.UUID,
-                references=(self.entity.table, 'id'),
-                required=True,
-            ).with_column(
-                name='date_created',
-                required=True,
-                field_type=FIELD_TYPES.DATE,
-            ).with_column(
-                name='branch',
-                field_type=FIELD_TYPES.UUID,
-            ).with_column(
-                name='deleted',
-                field_type=FIELD_TYPES.BOOLEAN,
-                default=False
-            ).with_column(
-                name='meta_instance_id',
-                field_type=FIELD_TYPES.UUID
-            ).with_column(
-                name='modified',
-                field_type=FIELD_TYPES.DATE,
-            ).with_column(
-                name='from_id',
-                field_type=FIELD_TYPES.UUID,
-            )
+            name='version_id',
+            field_type=FIELD_TYPES.UUID,
+            primary_key=True,
+            default='uuid_generate_v4()'
+        ).with_column(
+            name='id',
+            field_type=FIELD_TYPES.UUID,
+            references=(self.entity.table, 'id'),
+            required=True,
+        ).with_column(
+            name='date_created',
+            required=True,
+            field_type=FIELD_TYPES.DATE,
+        ).with_column(
+            name='branch',
+            field_type=FIELD_TYPES.UUID,
+        ).with_column(
+            name='deleted',
+            field_type=FIELD_TYPES.BOOLEAN,
+            default=False
+        ).with_column(
+            name='meta_instance_id',
+            field_type=FIELD_TYPES.UUID
+        ).with_column(
+            name='modified',
+            field_type=FIELD_TYPES.DATE,
+        ).with_column(
+            name='from_id',
+            field_type=FIELD_TYPES.UUID,
+        )
 
     def _create_table(self, migration):
         """
@@ -159,34 +159,34 @@ class Migration(models.Model):
             - primary key named id.
             - date_created to keep the version creation date.
         """
-        return migration.create_table(self.entity.table, 'entities')\
+        return migration.create_table(self.entity.table, 'entities') \
             .with_column(
-                name='id',
-                field_type=FIELD_TYPES.UUID,
-                primary_key=True,
-                default='uuid_generate_v4()'
-            ).with_column(
-                name='date_created',
-                field_type=FIELD_TYPES.DATE,
-                required=True,
-                default='NOW()'
-            ).with_column(
-                name='branch',
-                field_type=FIELD_TYPES.UUID,
-            ).with_column(
-                name='deleted',
-                field_type=FIELD_TYPES.BOOLEAN,
-                default=False
-            ).with_column(
-                name='meta_instance_id',
-                field_type=FIELD_TYPES.UUID
-            ).with_column(
-                name='modified',
-                field_type=FIELD_TYPES.DATE,
-            ).with_column(
-                name='from_id',
-                field_type=FIELD_TYPES.UUID,
-            )
+            name='id',
+            field_type=FIELD_TYPES.UUID,
+            primary_key=True,
+            default='uuid_generate_v4()'
+        ).with_column(
+            name='date_created',
+            field_type=FIELD_TYPES.DATE,
+            required=True,
+            default='NOW()'
+        ).with_column(
+            name='branch',
+            field_type=FIELD_TYPES.UUID,
+        ).with_column(
+            name='deleted',
+            field_type=FIELD_TYPES.BOOLEAN,
+            default=False
+        ).with_column(
+            name='meta_instance_id',
+            field_type=FIELD_TYPES.UUID
+        ).with_column(
+            name='modified',
+            field_type=FIELD_TYPES.DATE,
+        ).with_column(
+            name='from_id',
+            field_type=FIELD_TYPES.UUID,
+        )
 
     def create_tables(self):
         """
@@ -314,6 +314,16 @@ class Branch(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     solution = models.ForeignKey(Solution, on_delete=models.CASCADE, related_name='branches')
     name = models.CharField(max_length=30)
+    description = models.CharField(max_length=200, null=True)
+    owner = models.CharField(max_length=100, null=True)
+    status = models.CharField(max_length=100, null=True)
+    started_at = models.DateTimeField(auto_now=True, null=True)
+    deleted = models.BooleanField(default=False)
+    meta_instance_id = models.UUIDField(null=True)
+    modified = models.DateTimeField(null=True)
+    created_at = models.DateTimeField(null=True)
+    branch = models.CharField(max_length=30, null=True)
+    from_id = models.UUIDField(null=True)
 
     class Meta:
         constraints = [
