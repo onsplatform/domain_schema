@@ -112,11 +112,6 @@ class MappedFieldSerializer(serializers.ModelSerializer):
         fields = ('field_id', 'field_type', 'column_name', 'alias',)
 
 
-
-
-
-
-
 class EntityMapSerializer(WritableNestedModelSerializer):
     class EntityNestedSerializer(serializers.ModelSerializer):
         class Meta:
