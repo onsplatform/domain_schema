@@ -35,7 +35,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-CELERY_BROKER_URL = f'pyamqp://guest@{os.getenv("RABBIT_MQ", "rabbit")}//'
+CELERY_BROKER_URL = f'pyamqp://guest@{os.getenv("RABBIT_MQ", "rabbitmq")}//'
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_RESULT_BACKEND = 'django-db'
 CELERY_TASK_SERIALIZER = 'json'
