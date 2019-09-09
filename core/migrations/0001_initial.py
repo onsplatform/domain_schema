@@ -14,11 +14,6 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RunSQL(
-            """
-            CREATE DATABASE platform_domain_schema;
-            """
-        ),
         migrations.CreateModel(
             name='App',
             fields=[
