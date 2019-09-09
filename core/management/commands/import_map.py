@@ -16,17 +16,18 @@ class Command(BaseCommand):
         repository_id_list = git_repos.list_repo_id()
 
         # CREATE App
-        solution = Solution.objects.get(name='SAGER')
+        #import pdb; pdb.set_trace()
+        solution = Solution.objects.get(name='Sager')
 
         # for repo_id in repository_id_list:
         # get App name from 'plataforma.json' in the root of the git repository.)
         # app_name = git_repos.get_app_name_from_yaml(repo_id)
-        app_name = 'SAGER_Evento'
+        app_name = 'SAGER_Cenario_Configuracao'
         if app_name:
             print(f"========================== {app_name} ==========================")
             # yaml_map = yaml.load(git_repos.get_map_content(repo_id), Loader=yaml.FullLoader)
             # import pdb; pdb.set_trace()
-            with open('D:\platform\domain_schema\core\management\commands\SAGER_Cenario.map.yaml', 'r', encoding='utf-8') as f:
+            with open('D:\ONS\SAGER\sager.cenario.configuracao.manter.fabrica\Mapa\SAGER_Cenario_Configuracao.map.yaml', 'r', encoding='utf-8') as f:
                 stream = f.read()
 
             yaml_map = yaml.load(stream, Loader=yaml.FullLoader)

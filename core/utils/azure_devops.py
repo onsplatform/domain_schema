@@ -38,6 +38,9 @@ class AzureDevops:
 
             return repo_list
 
+
+
+
     def get_app_name(self, repo_id: str, file='plataforma.json'):
         """
         Returns a string containing the app name inside the given configuration file. Default is plataforma.json.

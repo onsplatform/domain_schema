@@ -1,16 +1,15 @@
 import os
-import yaml
-import itertools
 
+import yaml
 from django.core.management.base import BaseCommand
 from django.db import transaction
 
 from core.models import Entity, Solution, Field, FIELD_TYPES
+from core.tasks import apply_model_migration
 from core.utils import yaml_helper
 
-from core.tasks import apply_model_migration
 
-
+# todo: Check if Solutions are taking only the name. Sager was created as "Solution=Sager" instead of just "Sager"
 
 class EntityLoader:
     MAP_TYPES = {
@@ -30,7 +29,7 @@ class EntityLoader:
 
     def create_fields(self, entity, fields):
         for k, v in fields.items():
-            field_type= self.MAP_TYPES[v[0]]
+            field_type = self.MAP_TYPES[v[0]]
             field = Field(entity=entity, name=k, field_type=field_type)
             if field_type == self.MAP_TYPES['string']:
                 field.precision = 200
