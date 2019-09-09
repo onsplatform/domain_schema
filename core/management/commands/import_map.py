@@ -1,28 +1,44 @@
 from django.core.management.base import BaseCommand
 from core.models import *
-from core.utils import azure_devops as tfs
 import yaml
 import re
 from django.db import transaction
 import io
 
 
+class MapLoader:
+    def __init__(self, target_path, solution_name, app_name):
+        self.target_path = target_path
+        self.solution_name = solution_name
+        self.app_name = app_name
+
+
 class Command(BaseCommand):
+
+    def add_arguments(self, parser):
+        parser.add_argument(
+            'target_path', type=str, help='Path containing yaml files to be imported.')
+        parser.add_argument(
+            'solution', type=str, help='Solution name.')
+        parser.add_argument(
+            'app', type=str, help='Application name.')
+        parser.add_argument()
+
+    @staticmethod
+    def parse_arguments(**options):
+        target_path = options.pop('target_path')
+        solution_name = options.pop('solution', 'Sager')
+        app_name = options.pop('app')
+
+        return target_path, solution_name, app_name
+
     def handle(self, *args, **options):
 
-        # get a new project repository instance
-        git_repos = tfs.AzureDevops('weo6dxvr6l6e557q3feya7ijqfxxxfmfyhnat4fnqxawouoydvdq', 'sager')
-
-        repository_id_list = git_repos.list_repo_id()
-
-        # CREATE App
-        #import pdb; pdb.set_trace()
+        # Get solution
         solution = Solution.objects.get(name='Sager')
 
-        # for repo_id in repository_id_list:
-        # get App name from 'plataforma.json' in the root of the git repository.)
-        # app_name = git_repos.get_app_name_from_yaml(repo_id)
         app_name = 'SAGER_Cenario_Configuracao'
+
         if app_name:
             print(f"========================== {app_name} ==========================")
             # yaml_map = yaml.load(git_repos.get_map_content(repo_id), Loader=yaml.FullLoader)
@@ -87,4 +103,3 @@ class Command(BaseCommand):
         """ TODO: delete or refactor this! """
         # Get EntityMap or create it
         return Entity.objects.get(name=entity_name)
-
