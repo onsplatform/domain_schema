@@ -9,8 +9,6 @@ from core.tasks import apply_model_migration
 from core.utils import yaml_helper
 
 
-# todo: Check if Solutions are taking only the name. Sager was created as "Solution=Sager" instead of just "Sager"
-
 class EntityLoader:
     MAP_TYPES = {
         "string": FIELD_TYPES.VARCHAR,
@@ -31,8 +29,6 @@ class EntityLoader:
         for k, v in fields.items():
             field_type = self.MAP_TYPES[v[0]]
             field = Field(entity=entity, name=k, field_type=field_type)
-            if field_type == self.MAP_TYPES['string']:
-                field.precision = 200
             yield field
 
     def create_entity(self, source_file, solution):
@@ -72,7 +68,8 @@ class Command(BaseCommand):
         parser.add_argument(
             '-c', '--clear_before_import', action='store_true', help='Delete existing solution before importing.')
 
-    def parse_arguments(self, **options):
+    @staticmethod
+    def parse_arguments(**options):
         target_path = options.pop('target_path')
         clear_before_import = options.pop('clear_before_import')
         solution_name = options.pop('solution', 'SAGER')
