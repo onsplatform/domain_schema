@@ -7,7 +7,7 @@ from django.db import transaction
 
 
 class MapLoader:
-    def __init__(self, target_path, solution_name, app_name):
+    def __init__(self, target_path: str, solution_name: str, app_name: str):
         self.target_path = target_path
         self.solution_name = solution_name
         self.app_name = app_name
@@ -28,7 +28,6 @@ class MapLoader:
         for filter_key, filter_value in map_value.items():
             if filter_value:
 
-                #import pdb; pdb.set_trace()
                 # Get or Create a map_filter
                 map_filter, created = MapFilter.objects.get_or_create(map=entity_map, name=filter_key, defaults={'expression': filter_value})
 
@@ -47,65 +46,50 @@ class MapLoader:
             MapFilterParameter.objects.get_or_create(filter=map_filter, name=field_parameter, is_array=array)
 
     def run(self):
-        if self.app_name:
-            print(f"========================== {self.app_name} ==========================")
-            # yaml_map = yaml.load(git_repos.get_map_content(repo_id), Loader=yaml.FullLoader)
-            # import pdb; pdb.set_trace()
-            with open(self.target_path, 'r', encoding='utf-8') as f:
-                stream = f.read()
+        print(f"========================== {self.app_name} ==========================")
+        with open(self.target_path, 'r', encoding='utf-8') as f:
+            stream = f.read()
 
-            yaml_map = yaml.load(stream, Loader=yaml.FullLoader)
+        # Get solution id
+        solution_id = Solution.objects.get(name=self.solution_name)
 
-            map_app, _ = App.objects.get_or_create(name=self.app_name, solution=self.solution_name)
+        yaml_map = yaml.load(stream, Loader=yaml.FullLoader)
+        map_app, _ = App.objects.get_or_create(name=self.app_name, solution=solution_id)
 
-            # loop through dictionary to create EntityMap('agente', 'statusevento', etc)
-            for map_key, map_value in yaml_map.items():
-                with transaction.atomic():
-                    map_name = map_key
-                    map_entity = Entity.objects.get(name=map_value.get('model'))
+        # loop through dictionary to create EntityMap('agente', 'statusevento', etc)
+        for map_key, map_value in yaml_map.items():
+            with transaction.atomic():
+                map_name = map_key
+                map_entity = Entity.objects.get(name=map_value.get('model'))
 
-                    # CREATE EntityMap needs: current app, model or entity and a name.
-                    entity_map, _ = EntityMap.objects.get_or_create(name=map_name, app=map_app, entity=map_entity)
+                # CREATE EntityMap needs: current app, model or entity and a name.
+                entity_map, _ = EntityMap.objects.get_or_create(name=map_name, app=map_app, entity=map_entity)
 
-                    # CREATE fields: loop through fields in yaml file
-                    self.create_fields(entity_map, map_entity, map_value['fields'])
-                    # CREATE filters: loop through filters in yaml file
-                    self.create_filters(entity_map, map_value.get('filters', {}))
-
-    @staticmethod
-    def get_entity(entity_name: str):
-        """ TODO: delete or refactor this! """
-        # Get EntityMap or create it
-        return Entity.objects.get(name=entity_name)
+                # CREATE fields: loop through fields in yaml file
+                self.create_fields(entity_map, map_entity, map_value['fields'])
+                # CREATE filters: loop through filters in yaml file
+                self.create_filters(entity_map, map_value.get('filters', {}))
 
 
 class Command(BaseCommand):
     def add_arguments(self, parser):
-        parser.add_argument(
-            'target_path', type=str, help='Complete path and yaml file name to be imported.')
-        parser.add_argument(
-            'solution', type=str, help='Solution name.')
-        parser.add_argument(
-            'app', type=str, help='Application name.')
-        parser.add_argument()
+        parser.add_argument('target_path', type=str, help='Complete path and yaml file name to be imported.')
+        parser.add_argument('solution', type=str, help='Solution name.')
+        parser.add_argument('app', type=str, help='Application name.')
 
     @staticmethod
     def parse_arguments(**options):
         target_path = options.pop('target_path')
-        solution_name = options.pop('solution', 'Sager')
+        solution_name = options.pop('solution')
         app_name = options.pop('app')
 
         return target_path, solution_name, app_name
 
     def handle(self, *args, **options):
-        target_path, app_name, solution_name = self.parse_arguments(**options)
+        target_path, solution_name, app_name = self.parse_arguments(**options)
 
         if not os.path.exists(target_path):
             return '** target directory or file does not exist.'
 
         loader = MapLoader(target_path, solution_name, app_name)
-        # loader = EntityLoader(target_path, solution_name, clear_before_import)
-        maps = loader.run()
-        print(f"** {len(list(maps))} entities installed.")
-
-
+        loader.run()

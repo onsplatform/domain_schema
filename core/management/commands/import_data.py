@@ -29,6 +29,8 @@ class EntityLoader:
         for k, v in fields.items():
             field_type = self.MAP_TYPES[v[0]]
             field = Field(entity=entity, name=k, field_type=field_type)
+            if field_type == self.MAP_TYPES['string']:
+                field.precision = 200
             yield field
 
     def create_entity(self, source_file, solution):
@@ -61,10 +63,8 @@ class EntityLoader:
 
 class Command(BaseCommand):
     def add_arguments(self, parser):
-        parser.add_argument(
-            'target_path', type=str, help='Path containing yaml files to be imported.')
-        parser.add_argument(
-            'solution', type=str, help='Solution name.')
+        parser.add_argument('target_path', type=str, help='Path containing yaml files to be imported.')
+        parser.add_argument('solution', type=str, help='Solution name.')
         parser.add_argument(
             '-c', '--clear_before_import', action='store_true', help='Delete existing solution before importing.')
 
