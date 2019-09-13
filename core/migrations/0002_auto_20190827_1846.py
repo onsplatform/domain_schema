@@ -12,11 +12,6 @@ class Migration(migrations.Migration):
     operations = [
         migrations.AddField(
             model_name='branch',
-            name='branch',
-            field=models.CharField(max_length=30, null=True),
-        ),
-        migrations.AddField(
-            model_name='branch',
             name='created_at',
             field=models.DateTimeField(null=True),
         ),
@@ -29,11 +24,6 @@ class Migration(migrations.Migration):
             model_name='branch',
             name='description',
             field=models.CharField(max_length=200, null=True),
-        ),
-        migrations.AddField(
-            model_name='branch',
-            name='from_id',
-            field=models.UUIDField(null=True),
         ),
         migrations.AddField(
             model_name='branch',
