@@ -313,7 +313,7 @@ class Branch(models.Model):
     """
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     solution = models.ForeignKey(Solution, on_delete=models.CASCADE, related_name='branches')
-    name = models.CharField(max_length=30)
+    name = models.CharField(max_length=40)
     description = models.CharField(max_length=200, null=True)
     owner = models.CharField(max_length=100, null=True)
     status = models.CharField(max_length=100, null=True)
@@ -322,8 +322,6 @@ class Branch(models.Model):
     meta_instance_id = models.UUIDField(null=True)
     modified = models.DateTimeField(null=True)
     created_at = models.DateTimeField(null=True)
-    branch = models.CharField(max_length=30, null=True)
-    from_id = models.UUIDField(null=True)
 
     class Meta:
         constraints = [

@@ -2,8 +2,8 @@ from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
-from core.models import Solution, App, Entity, EntityMap
-from core.serializers import SolutionSerializer, AppSerializer, EntitySerializer, EntityMapSerializer
+from core.models import Solution, App, Entity, EntityMap, Branch
+from core.serializers import SolutionSerializer, AppSerializer, EntitySerializer, EntityMapSerializer, BranchSerializer
 
 
 __all__ = ['SolutionView', 'AppView', 'EntityView', 'EntityMapView', ]
@@ -31,6 +31,23 @@ class EntityView(viewsets.ModelViewSet):
     """
     serializer_class = EntitySerializer
     queryset = Entity.objects.all().order_by('name')
+
+
+class BranchView(viewsets.ModelViewSet):
+    """
+    branch model view
+    """
+    serializer_class = BranchSerializer
+    queryset = Branch.objects.all().order_by('name')
+
+    def get_queryset(self, *args, **kwargs):
+        solution_name = self.kwargs.get('solution_name')
+        branch_name = self.kwargs.get('branch_name')
+
+        if solution_name and branch_name:
+            return Branch.objects.filter(solution__name=solution_name, name=branch_name)
+
+        return Branch.objects.all()
 
 
 class EntityMapView(viewsets.ModelViewSet):

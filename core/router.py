@@ -3,7 +3,7 @@ from rest_framework import routers
 from rest_framework.schemas import get_schema_view
 from rest_framework_swagger.renderers import SwaggerUIRenderer, OpenAPIRenderer
 
-from core.views import SolutionView, AppView, EntityView, EntityMapView
+from core.views import SolutionView, AppView, EntityView, EntityMapView, BranchView
 
 
 __all__ = ['router', ]
@@ -15,6 +15,8 @@ schema_view = get_schema_view(title='ONS Platform Domain API', renderer_classes=
 router = routers.SimpleRouter()
 router.register('solution', SolutionView)
 router.register('app', AppView)
+router.register('branch', BranchView)
+router.register('branch/(?P<solution_name>.+)/(?P<branch_name>.+)', BranchView)
 router.register('entity', EntityView)
 router.register('entitymap', EntityMapView),
 router.register('entitymap/(?P<app_name>.+)/(?P<map_name>.+)', EntityMapView),
