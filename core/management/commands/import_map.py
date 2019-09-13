@@ -1,52 +1,16 @@
+import os
+import re
 from django.core.management.base import BaseCommand
 from core.models import *
-from core.utils import azure_devops as tfs
 import yaml
-import re
 from django.db import transaction
-import io
 
 
-class Command(BaseCommand):
-    def handle(self, *args, **options):
-
-        # get a new project repository instance
-        git_repos = tfs.AzureDevops('weo6dxvr6l6e557q3feya7ijqfxxxfmfyhnat4fnqxawouoydvdq', 'sager')
-
-        repository_id_list = git_repos.list_repo_id()
-
-        # CREATE App
-        #import pdb; pdb.set_trace()
-        solution = Solution.objects.get(name='Sager')
-
-        # for repo_id in repository_id_list:
-        # get App name from 'plataforma.json' in the root of the git repository.)
-        # app_name = git_repos.get_app_name_from_yaml(repo_id)
-        app_name = 'SAGER_Cenario_Configuracao'
-        if app_name:
-            print(f"========================== {app_name} ==========================")
-            # yaml_map = yaml.load(git_repos.get_map_content(repo_id), Loader=yaml.FullLoader)
-            # import pdb; pdb.set_trace()
-            with open('D:\ONS\SAGER\sager.cenario.configuracao.manter.fabrica\Mapa\SAGER_Cenario_Configuracao.map.yaml', 'r', encoding='utf-8') as f:
-                stream = f.read()
-
-            yaml_map = yaml.load(stream, Loader=yaml.FullLoader)
-
-            map_app, _ = App.objects.get_or_create(name=app_name, solution=solution)
-
-            # loop through dictionary to create EntityMap('agente', 'statusevento', etc)
-            for map_key, map_value in yaml_map.items():
-                with transaction.atomic():
-                    map_name = map_key
-                    map_entity = Entity.objects.get(name=map_value.get('model'))
-
-                    # CREATE EntityMap needs: current app, model or entity and a name.
-                    entity_map, _ = EntityMap.objects.get_or_create(name=map_name, app=map_app, entity=map_entity)
-
-                    # CREATE fields: loop through fields in yaml file
-                    self.create_fields(entity_map, map_entity, map_value['fields'])
-                    # CREATE filters: loop through filters in yaml file
-                    self.create_filters(entity_map, map_value.get('filters', {}))
+class MapLoader:
+    def __init__(self, target_path: str, solution_name: str, app_name: str):
+        self.target_path = target_path
+        self.solution_name = solution_name
+        self.app_name = app_name
 
     @staticmethod
     def create_fields(entity_map, map_entity, map_value):
@@ -64,7 +28,6 @@ class Command(BaseCommand):
         for filter_key, filter_value in map_value.items():
             if filter_value:
 
-                #import pdb; pdb.set_trace()
                 # Get or Create a map_filter
                 map_filter, created = MapFilter.objects.get_or_create(map=entity_map, name=filter_key, defaults={'expression': filter_value})
 
@@ -82,9 +45,51 @@ class Command(BaseCommand):
             field_parameter = match_value.group()[1:]
             MapFilterParameter.objects.get_or_create(filter=map_filter, name=field_parameter, is_array=array)
 
-    @staticmethod
-    def get_entity(entity_name: str):
-        """ TODO: delete or refactor this! """
-        # Get EntityMap or create it
-        return Entity.objects.get(name=entity_name)
+    def run(self):
+        print(f"========================== {self.app_name} ==========================")
+        with open(self.target_path, 'r', encoding='utf-8') as f:
+            stream = f.read()
 
+        # Get solution id
+        solution_id = Solution.objects.get(name=self.solution_name)
+
+        yaml_map = yaml.load(stream, Loader=yaml.FullLoader)
+        map_app, _ = App.objects.get_or_create(name=self.app_name, solution=solution_id)
+
+        # loop through dictionary to create EntityMap('agente', 'statusevento', etc)
+        for map_key, map_value in yaml_map.items():
+            with transaction.atomic():
+                map_name = map_key
+                map_entity = Entity.objects.get(name=map_value.get('model'))
+
+                # CREATE EntityMap needs: current app, model or entity and a name.
+                entity_map, _ = EntityMap.objects.get_or_create(name=map_name, app=map_app, entity=map_entity)
+
+                # CREATE fields: loop through fields in yaml file
+                self.create_fields(entity_map, map_entity, map_value['fields'])
+                # CREATE filters: loop through filters in yaml file
+                self.create_filters(entity_map, map_value.get('filters', {}))
+
+
+class Command(BaseCommand):
+    def add_arguments(self, parser):
+        parser.add_argument('target_path', type=str, help='Complete path and yaml file name to be imported.')
+        parser.add_argument('solution', type=str, help='Solution name.')
+        parser.add_argument('app', type=str, help='Application name.')
+
+    @staticmethod
+    def parse_arguments(**options):
+        target_path = options.pop('target_path')
+        solution_name = options.pop('solution')
+        app_name = options.pop('app')
+
+        return target_path, solution_name, app_name
+
+    def handle(self, *args, **options):
+        target_path, solution_name, app_name = self.parse_arguments(**options)
+
+        if not os.path.exists(target_path):
+            return '** target directory or file does not exist.'
+
+        loader = MapLoader(target_path, solution_name, app_name)
+        loader.run()
