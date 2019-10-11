@@ -61,7 +61,7 @@ class Entity(models.Model):
     SCHEMA = {
         'id': FIELD_TYPES.UUID,
         'date_created': FIELD_TYPES.DATE,
-        'branch': FIELD_TYPES.UUID,
+        'branch': FIELD_TYPES.VARCHAR,
 
     }
 
@@ -133,7 +133,8 @@ class Migration(models.Model):
             field_type=FIELD_TYPES.DATE,
         ).with_column(
             name='branch',
-            field_type=FIELD_TYPES.UUID,
+            field_type=FIELD_TYPES.VARCHAR,
+            precision=40
         ).with_column(
             name='deleted',
             field_type=FIELD_TYPES.BOOLEAN,
@@ -147,6 +148,9 @@ class Migration(models.Model):
         ).with_column(
             name='from_id',
             field_type=FIELD_TYPES.UUID,
+        ).with_column(
+            name='related_id',
+            field_type=FIELD_TYPES.UUID
         )
 
     def _create_table(self, migration):
@@ -172,7 +176,8 @@ class Migration(models.Model):
             default='NOW()'
         ).with_column(
             name='branch',
-            field_type=FIELD_TYPES.UUID,
+            field_type=FIELD_TYPES.VARCHAR,
+            precision=40
         ).with_column(
             name='deleted',
             field_type=FIELD_TYPES.BOOLEAN,
@@ -186,6 +191,9 @@ class Migration(models.Model):
         ).with_column(
             name='from_id',
             field_type=FIELD_TYPES.UUID,
+        ).with_column(
+            name='related_id',
+            field_type=FIELD_TYPES.UUID
         )
 
     def create_tables(self):
