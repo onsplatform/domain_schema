@@ -137,7 +137,7 @@ class EntityMapSerializer(WritableNestedModelSerializer):
             {'field_type': str(models.FIELD_TYPES.VARCHAR), 'column_name': 'meta_instance_id', 'alias': 'instance_id'},
             {'field_type': str(models.FIELD_TYPES.DATE), 'column_name': 'modified', 'alias': 'modified_at'},
             {'field_type': str(models.FIELD_TYPES.VARCHAR), 'column_name': 'from_id', 'alias': 'from_id'},
-            {'field_type': str(models.FIELD_TYPES.UUID), 'column_name': 'branch', 'alias': 'branch'}
+            {'field_type': str(models.FIELD_TYPES.VARCHAR), 'column_name': 'branch', 'alias': 'branch'}
         ]
 
     # app_id = serializers.IntegerField(required=True, write_only=True)
