@@ -170,4 +170,17 @@ class Migration(migrations.Migration):
             $function$
         """
         ),
+        migrations.RunSQL(
+            """
+                CREATE OR REPLACE FUNCTION entities.insert_history()
+                RETURNS trigger
+                LANGUAGE plpgsql
+                AS $function$
+                    BEGIN
+                        EXECUTE 'INSERT INTO ' || TG_RELID::regclass::text || '_history SELECT public.uuid_generate_v4() as version_id, ($1).*' USING NEW;
+                        RETURN NEW;
+                    END;
+                $function$
+            """
+        ),
     ]
