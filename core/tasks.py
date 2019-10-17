@@ -12,12 +12,6 @@ TRIGGER_TEMPL = """
         EXECUTE PROCEDURE {schema}.save_history();
 """
 
-TRIGGER_TEMPL_INSERT = """
-    CREATE TRIGGER insert_{entity}_history
-        AFTER INSERT ON {schema}.{table}
-        FOR EACH ROW
-        EXECUTE PROCEDURE {schema}.insert_history();
-"""
 
 @app.task(trail=True)
 def apply_model_migration(migration_id):
@@ -35,11 +29,6 @@ def apply_model_migration(migration_id):
                 schema='entities',
                 entity=migration.entity.name,
                 table=migration.entity.table))
-            cursor.execute(TRIGGER_TEMPL_INSERT.format(
-                schema='entities',
-                entity=migration.entity.name,
-                table=migration.entity.table))
-
 
         migration.date_executed = datetime.now()
         migration.save()
