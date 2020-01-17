@@ -36,6 +36,8 @@ class Migration(migrations.Migration):
                 ('name', models.CharField(max_length=50)),
                 ('app', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='maps', to='core.App')),
                 ('entity', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='maps', to='core.Entity')),
+                ('reprocessable', models.BooleanField(default=False)),
+
             ],
         ),
         migrations.CreateModel(
