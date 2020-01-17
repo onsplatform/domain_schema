@@ -20,7 +20,7 @@ class SolutionSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = models.Solution
-        fields = ('id', 'name',)
+        fields = ('id', 'name', 'description', )
 
 
 class BranchSerializer(serializers.ModelSerializer):
@@ -44,13 +44,27 @@ class AppSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = models.App
-        fields = ('id', 'name', 'solution_id',)
+        fields = ('id', 'name', 'solution_id', 'container', 'type', 'technology')
         validators = [
             UniqueTogetherValidator(
                 queryset=models.App.objects.all(),
                 fields=('solution_id', 'name'))
         ]
 
+class AppVersionSerializer(serializers.ModelSerializer):
+    """
+    app version model serializer
+    """
+    app_id = serializers.IntegerField(required=True)
+
+    class Meta:
+        model = models.AppVersion
+        fields = ('id', 'app_id', 'version', 'tag', 'date_begin_validity', 'date_end_validity', 'process_id')
+        validators = [
+            UniqueTogetherValidator(
+                queryset=models.AppVersion.objects.all(),
+                fields=('app_id', 'version'))
+        ]
 
 class FieldSerializer(serializers.ModelSerializer):
     """

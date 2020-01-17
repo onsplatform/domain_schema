@@ -28,6 +28,7 @@ class Solution(models.Model):
     Solution model. This is the main solution to which the platform will serve. (SAGER)
     """
     name = models.CharField(max_length=30, unique=True)
+    description = models.CharField(max_length=400, null=True)
 
 
 class App(models.Model):
@@ -35,12 +36,33 @@ class App(models.Model):
     app model
     """
     solution = models.ForeignKey(Solution, on_delete=models.CASCADE, related_name='apps')
-    name = models.CharField(max_length=30)
+    name = models.CharField(max_length=100)
+    container = models.CharField(max_length=100, null=True)
+    type = models.CharField(max_length=30, null=True)
+    technology = models.CharField(max_length=30, null=True)
+    description = models.CharField(max_length=400, null=True)
 
     class Meta:
         constraints = [
             models.UniqueConstraint(
                 fields=["solution", "name"], name='unique_solution_app')
+        ]
+
+class AppVersion(models.Model):
+    """
+    app version model
+    """
+    app = models.ForeignKey(App, on_delete=models.CASCADE, related_name='versions')
+    version = models.CharField(max_length=30)
+    tag = models.CharField(max_length=255)
+    process_id = models.UUIDField(null=True)
+    date_begin_validity = models.DateTimeField(null=True)
+    date_end_validity = models.DateTimeField(null=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["app", "version"], name='unique_app_version')
         ]
 
 
