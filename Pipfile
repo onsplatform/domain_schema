@@ -15,7 +15,7 @@ requests = "*"
 [packages]
 djangorestframework = "==3.9.2"
 drf-writable-nested = "==0.5.1"
-Django = "==2.2"
+Django = "==2.2.10"
 psycopg2-binary = "*"
 celery = "*"
 django-celery-results = "*"
