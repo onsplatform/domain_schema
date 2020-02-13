@@ -5,14 +5,12 @@ from rest_framework_swagger.renderers import SwaggerUIRenderer, OpenAPIRenderer
 
 from core.views import SolutionView, AppView, AppVersionView, EntityView, EntityMapView, BranchView
 
-
 __all__ = ['router', ]
-
 
 schema_view = get_schema_view(title='ONS Platform Domain API', renderer_classes=[SwaggerUIRenderer, OpenAPIRenderer])
 
-
 router = routers.SimpleRouter()
+router.register('solution/byname/(?P<solution_name>.+)', SolutionView)
 router.register('solution', SolutionView)
 router.register('app', AppView)
 router.register('app/(?P<solution_id>.+)/(?P<name>.+)', AppView)

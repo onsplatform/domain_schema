@@ -16,6 +16,14 @@ class SolutionView(viewsets.ModelViewSet):
     serializer_class = SolutionSerializer
     queryset = Solution.objects.all().order_by('name')
 
+    def get_queryset(self, *args, **kwargs):
+        solution_name = self.kwargs.get('solution_name')
+
+        if solution_name:
+            return Solution.objects.filter(name=solution_name)
+
+        return Solution.objects.all()
+
 
 class AppView(viewsets.ModelViewSet):
     """
@@ -60,7 +68,7 @@ class BranchView(viewsets.ModelViewSet):
         branch_name = self.kwargs.get('branch_name')
 
         if solution_name and branch_name:
-            return Branch.objects.filter(solution__name=solution_name, name=branch_name)
+            return Branch.objects.filter(solution_name=solution_name, name=branch_name)
 
         return Branch.objects.all()
 

@@ -20,7 +20,7 @@ class SolutionSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = models.Solution
-        fields = ('id', 'name', 'description', )
+        fields = ('id', 'name', 'description', 'is_reprocessing', 'is_reprocessable', )
 
 
 class BranchSerializer(serializers.ModelSerializer):
