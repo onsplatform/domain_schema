@@ -1,10 +1,12 @@
 from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
-
+from django.core import management
+from rest_framework.views import APIView
+from rest_framework import status
 from core.models import Solution, App, AppVersion, Entity, EntityMap, Branch
 from core.serializers import SolutionSerializer, AppSerializer, AppVersionSerializer, EntitySerializer, EntityMapSerializer, BranchSerializer
-
+import json
 
 __all__ = ['SolutionView', 'AppView', 'EntityView', 'EntityMapView', ]
 
@@ -80,3 +82,50 @@ class EntityMapView(viewsets.ModelViewSet):
             return EntityMap.objects.filter(app__name=app_name, name=map_name)
 
         return EntityMap.objects.all()
+
+
+class ImportDataView(APIView):
+
+    def post(self, request):
+        """
+        Loads the yaml files and create the domain.
+        SAMPLE URL: http://127.0.0.1:8000/api/v1/import_data/
+        {
+            "path": "D:\\_PLATFORM\\sager\\Dominio",
+            "solution": "Sager"
+        }
+        """
+        try:
+            assert (request.POST.get('_content') is not ''), "Request contains no data: " + str(request.POST)
+            result = json.loads(request.POST.get('_content'))
+            path = result.get('path')
+            solution = result.get('solution')
+
+            management.call_command("import_data", path, solution)
+
+            return Response('Success', status=status.HTTP_201_CREATED)
+        except AssertionError as err:
+            return Response(str(err), status=status.HTTP_400_BAD_REQUEST)
+        except Exception as ex:
+            return Response('ERROR => ' + str(ex), status=status.HTTP_400_BAD_REQUEST)
+
+
+class ImportMapView(APIView):
+
+    def post(self, request):
+        """
+        Loads the yaml files and create the maps.
+        SAMPLE URL: http://127.0.0.1:8000/api/v1/import_map/
+        """
+        try:
+            result = json.loads(request.POST.get('_content'))
+
+            path = result.get('path')
+            solution = result.get('solution')
+            app = result.get('app')
+
+            management.call_command("import_map", path, solution, app)
+
+            return Response('Success', status=status.HTTP_201_CREATED)
+        except Exception as ex:
+            return Response('ERROR => ' + str(ex), status=status.HTTP_400_BAD_REQUEST)
