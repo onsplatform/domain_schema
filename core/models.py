@@ -236,8 +236,8 @@ class Migration(models.Model):
 
     def alter_tables(self):
         db_migration = DatabaseMigration(settings.MIGRATION_DIALECT)
-        table = db_migration.alter_table(self.entity.table)
-        table_history = db_migration.alter_table(self.history_table)
+        table = db_migration.alter_table(self.entity.table, 'entities')
+        table_history = db_migration.alter_table(self.history_table, 'entities')
 
         for field in self.fields.all():
             table = table.add_column(field.name, field.field_type)

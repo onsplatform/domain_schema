@@ -1,10 +1,12 @@
-from rest_framework import viewsets
-from rest_framework.decorators import action
+import yaml
+from rest_framework import viewsets, views
+from core.management.commands.import_data import EntityLoader
 from rest_framework.response import Response
+from rest_framework.parsers import MultiPartParser
 
 from core.models import Solution, App, AppVersion, Entity, EntityMap, Branch
-from core.serializers import SolutionSerializer, AppSerializer, AppVersionSerializer, EntitySerializer, EntityMapSerializer, BranchSerializer
-
+from core.serializers import SolutionSerializer, AppSerializer, AppVersionSerializer, EntitySerializer, \
+    EntityMapSerializer, BranchSerializer
 
 __all__ = ['SolutionView', 'AppView', 'EntityView', 'EntityMapView', ]
 
@@ -41,12 +43,14 @@ class AppView(viewsets.ModelViewSet):
 
         return App.objects.all()
 
+
 class AppVersionView(viewsets.ModelViewSet):
     """
     app version view
     """
     serializer_class = AppVersionSerializer
     queryset = AppVersion.objects.all().order_by('version')
+
 
 class EntityView(viewsets.ModelViewSet):
     """
@@ -88,3 +92,22 @@ class EntityMapView(viewsets.ModelViewSet):
             return EntityMap.objects.filter(app__name=app_name, name=map_name)
 
         return EntityMap.objects.all()
+
+
+class CreateEntityView(views.APIView):
+    """
+    upload metadata view
+    """
+
+    parser_classes = (MultiPartParser,)
+
+    def post(self, request, format=None):
+        file_obj = request.FILES
+        solution = request.data['solution']
+        loader = EntityLoader()
+
+        for file in file_obj:
+            yaml_dict = yaml.load(file_obj[file], Loader=yaml.FullLoader)
+            loader.create_entity(yaml_dict, solution)
+
+        return Response(status=200)

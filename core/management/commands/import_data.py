@@ -20,32 +20,35 @@ class EntityLoader:
         "boolean": FIELD_TYPES.BOOLEAN,
     }
 
-    def __init__(self, target_path, solution_name, delete_existing_solution=False):
+    def __init__(self, target_path=None, solution_name=None, delete_existing_solution=False):
         self.target_path = target_path
         self.solution_name = solution_name
         self.delete_existing_solution = delete_existing_solution
 
     def create_fields(self, entity, fields):
+        ret = []
         for k, v in fields.items():
-            field_type = self.MAP_TYPES[v[0]]
-            field = Field(entity=entity, name=k, field_type=field_type)
-            if field_type == self.MAP_TYPES['string']:
-                field.precision = 200
-            yield field
+            if not Field.objects.filter(entity=entity, name=k).exists():
+                field_type = self.MAP_TYPES[v[0]]
+                field = Field(entity=entity, name=k, field_type=field_type)
+                if field_type == self.MAP_TYPES['string']:
+                    field.precision = 200
+                ret.append(field)
+        return ret
 
-    def create_entity(self, source_file, solution):
-        with open(source_file, 'r', encoding='utf-8') as stream:
+    def create_entity(self, yaml_dict, solution):
+        """with open(source_file, 'r', encoding='utf-8') as stream:
             yaml_dict = yaml.load(stream, Loader=yaml.FullLoader)
-
+        """
         for name, fields in yaml_dict.items():
             # create entity metadata.
-            entity = Entity.objects.create(name=name, solution=solution)
+            entity = Entity.objects.get(name=name)
+            entity = Entity.objects.create(name=name, solution=solution) if not entity else entity
             entity_fields = self.create_fields(entity, fields)
-            Field.objects.bulk_create(entity_fields)
-
-            # create database structure.
-            migration = entity.make_migration()
-            apply_model_migration.run(migration.id)
+            if entity_fields:
+                Field.objects.bulk_create(entity_fields)
+                migration = entity.make_migration()
+                apply_model_migration.run(migration.id)
 
             return entity
 

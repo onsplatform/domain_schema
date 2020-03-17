@@ -25,10 +25,11 @@ def apply_model_migration(migration_id):
         with connection.cursor() as cursor:
             cursor.execute(command)
             cursor.execute(history_command)
-            cursor.execute(TRIGGER_TEMPL.format(
-                schema='entities',
-                entity=migration.entity.name,
-                table=migration.entity.table))
+            if migration.first:
+                cursor.execute(TRIGGER_TEMPL.format(
+                    schema='entities',
+                    entity=migration.entity.name,
+                    table=migration.entity.table))
 
         migration.date_executed = datetime.now()
         migration.save()
