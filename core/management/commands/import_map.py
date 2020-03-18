@@ -7,7 +7,7 @@ from django.db import transaction
 
 
 class MapLoader:
-    def __init__(self, target_path: str, solution_name: str, app_name: str):
+    def __init__(self, target_path: str = None, solution_name: str = None, app_name: str = None):
         self.target_path = target_path
         self.solution_name = solution_name
         self.app_name = app_name
@@ -27,9 +27,9 @@ class MapLoader:
     def create_filters(self, entity_map, map_value):
         for filter_key, filter_value in map_value.items():
             if filter_value:
-
                 # Get or Create a map_filter
-                map_filter, created = MapFilter.objects.get_or_create(map=entity_map, name=filter_key, defaults={'expression': filter_value})
+                map_filter, created = MapFilter.objects.get_or_create(map=entity_map, name=filter_key,
+                                                                      defaults={'expression': filter_value})
 
                 # Proceed to obtain and persist the parameters.
                 self.create_filter_parameters(filter_value, map_filter)
@@ -45,30 +45,30 @@ class MapLoader:
             field_parameter = match_value.group()[1:]
             MapFilterParameter.objects.get_or_create(filter=map_filter, name=field_parameter, is_array=array)
 
-    def run(self):
-        print(f"========================== {self.app_name} ==========================")
-        with open(self.target_path, 'r', encoding='utf-8') as f:
-            stream = f.read()
+    def create_maps(self, yaml_dict, app_name, app_version):
+        with transaction.atomic():
+            app = App.objects.get(name=app_name)
+            app_version = AppVersion.objects.get(app=app, version=app_version)
 
-        # Get solution id
-        solution_id = Solution.objects.get(name=self.solution_name)
-
-        yaml_map = yaml.load(stream, Loader=yaml.FullLoader)
-        map_app, _ = App.objects.get_or_create(name=self.app_name, solution=solution_id)
-
-        # loop through dictionary to create EntityMap('agente', 'statusevento', etc)
-        for map_key, map_value in yaml_map.items():
-            with transaction.atomic():
-                map_name = map_key
-                map_entity = Entity.objects.get(name=map_value.get('model'))
-
-                # CREATE EntityMap needs: current app, model or entity and a name.
-                entity_map, _ = EntityMap.objects.get_or_create(name=map_name, app=map_app, entity=map_entity)
-
-                # CREATE fields: loop through fields in yaml file
-                self.create_fields(entity_map, map_entity, map_value['fields'])
-                # CREATE filters: loop through filters in yaml file
+            for map_name, map_value in yaml_dict.items():
+                entity = Entity.objects.get(name=map_value.get('model'))
+                EntityMap.objects.get(name=map_name, app_version=app_version, entity=entity).delete()
+                entity_map = EntityMap.objects.create(name=map_name,
+                                                      app_version=app_version,
+                                                      entity=entity)
+                self.create_fields(entity_map, entity, map_value['fields'])
                 self.create_filters(entity_map, map_value.get('filters', {}))
+
+    def run(self):
+        with transaction.atomic():
+            print(f"========================== {self.app_name} ==========================")
+            with open(self.target_path, 'r', encoding='utf-8') as f:
+                stream = f.read()
+            # Get solution id
+            solution = Solution.objects.get(name=self.solution_name)
+
+            yaml_map = yaml.load(stream, Loader=yaml.FullLoader)
+            self.create_maps(yaml_map, solution, self.app_name, '1.0')
 
 
 class Command(BaseCommand):

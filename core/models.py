@@ -275,13 +275,13 @@ class EntityMap(models.Model):
     """
     Map model
     """
-    app = models.ForeignKey(App, on_delete=models.CASCADE, related_name='maps')
+    app_version = models.ForeignKey(AppVersion, on_delete=models.CASCADE, related_name='maps')
     entity = models.ForeignKey(Entity, on_delete=models.CASCADE, related_name='maps')
     name = models.CharField(max_length=50)
     reprocessable = models.BooleanField(default=False)
     
     class Meta:
-        unique_together = (("app", "name"),)
+        unique_together = (("app_version", "name"),)
 
     def save(self, *args, **kwargs):
         with transaction.atomic():

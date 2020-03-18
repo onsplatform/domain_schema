@@ -1,6 +1,7 @@
 import yaml
 from rest_framework import viewsets, views
 from core.management.commands.import_data import EntityLoader
+from core.management.commands.import_map import MapLoader
 from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser
 
@@ -103,11 +104,31 @@ class CreateEntityView(views.APIView):
 
     def post(self, request, format=None):
         file_obj = request.FILES
-        solution = request.data['solution']
+        solution = Solution.objects.get(name=request.data['solution'])
         loader = EntityLoader()
 
         for file in file_obj:
             yaml_dict = yaml.load(file_obj[file], Loader=yaml.FullLoader)
             loader.create_entity(yaml_dict, solution)
+
+        return Response(status=200)
+
+
+class CreateMapMapView(views.APIView):
+    """
+    upload maps view
+    """
+
+    parser_classes = (MultiPartParser,)
+
+    def post(self, request, format=None):
+        file_obj = request.FILES
+        app_name = request.data['app']
+        app_version = request.data['app_version']
+        loader = MapLoader()
+
+        for file in file_obj:
+            yaml_dict = yaml.load(file_obj[file], Loader=yaml.FullLoader)
+            loader.create_maps(yaml_dict, app_name, app_version)
 
         return Response(status=200)

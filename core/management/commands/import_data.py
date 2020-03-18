@@ -37,20 +37,17 @@ class EntityLoader:
         return ret
 
     def create_entity(self, yaml_dict, solution):
-        """with open(source_file, 'r', encoding='utf-8') as stream:
-            yaml_dict = yaml.load(stream, Loader=yaml.FullLoader)
-        """
-        for name, fields in yaml_dict.items():
-            # create entity metadata.
-            entity = Entity.objects.get(name=name)
-            entity = Entity.objects.create(name=name, solution=solution) if not entity else entity
-            entity_fields = self.create_fields(entity, fields)
-            if entity_fields:
-                Field.objects.bulk_create(entity_fields)
-                migration = entity.make_migration()
-                apply_model_migration.run(migration.id)
+        with transaction.atomic():
+            for name, fields in yaml_dict.items():
+                entity = Entity.objects.get(name=name)
+                entity = Entity.objects.create(name=name, solution=solution) if not entity else entity
+                entity_fields = self.create_fields(entity, fields)
+                if entity_fields:
+                    Field.objects.bulk_create(entity_fields)
+                    migration = entity.make_migration()
+                    apply_model_migration.run(migration.id)
 
-            return entity
+                return entity
 
     def run(self):
         with transaction.atomic():
