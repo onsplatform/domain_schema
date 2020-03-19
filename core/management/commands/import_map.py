@@ -52,7 +52,12 @@ class MapLoader:
 
             for map_name, map_value in yaml_dict.items():
                 entity = Entity.objects.get(name=map_value.get('model'))
-                EntityMap.objects.get(name=map_name, app_version=app_version, entity=entity).delete()
+                entity_map = EntityMap.objects.filter(name=map_name,
+                                      app_version=app_version,
+                                      entity=entity)
+                if entity_map:
+                    entity_map.delete()
+
                 entity_map = EntityMap.objects.create(name=map_name,
                                                       app_version=app_version,
                                                       entity=entity)
