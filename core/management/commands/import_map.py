@@ -48,8 +48,6 @@ class MapLoader:
         with transaction.atomic():
             app = App.objects.get(name=app_name)
             app_version = AppVersion.objects.get(app=app, version=app_version)
-            import pdb;
-            pdb.set_trace()
             for map_name, map_value in yaml_dict.items():
                 reprocessable = map_value.get('reprocessable', False)
                 entity = Entity.objects.get(name=map_value.get('model'))
