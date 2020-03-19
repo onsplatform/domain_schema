@@ -1,9 +1,11 @@
 import os
 import re
-from django.core.management.base import BaseCommand
-from core.models import *
 import yaml
+
 from django.db import transaction
+from django.core.management.base import BaseCommand
+
+from core.models import *
 
 
 class MapLoader:
@@ -27,11 +29,9 @@ class MapLoader:
     def create_filters(self, entity_map, map_value):
         for filter_key, filter_value in map_value.items():
             if filter_value:
-                # Get or Create a map_filter
                 map_filter, created = MapFilter.objects.get_or_create(map=entity_map, name=filter_key,
                                                                       defaults={'expression': filter_value})
 
-                # Proceed to obtain and persist the parameters.
                 self.create_filter_parameters(filter_value, map_filter)
 
     @staticmethod
@@ -39,7 +39,6 @@ class MapLoader:
         regex = r"([:\$]\w+)"
         matches = re.finditer(regex, filter_value)
 
-        # for each match in the expression, create the appropriate parameter
         for _, match_value in enumerate(matches, start=1):
             array = match_value.group().startswith('$')
             field_parameter = match_value.group()[1:]
@@ -49,8 +48,10 @@ class MapLoader:
         with transaction.atomic():
             app = App.objects.get(name=app_name)
             app_version = AppVersion.objects.get(app=app, version=app_version)
-
+            import pdb;
+            pdb.set_trace()
             for map_name, map_value in yaml_dict.items():
+                reprocessable = map_value.get('reprocessable', False)
                 entity = Entity.objects.get(name=map_value.get('model'))
                 entity_map = EntityMap.objects.filter(name=map_name,
                                       app_version=app_version,
@@ -60,7 +61,8 @@ class MapLoader:
 
                 entity_map = EntityMap.objects.create(name=map_name,
                                                       app_version=app_version,
-                                                      entity=entity)
+                                                      entity=entity,
+                                                      reprocessable=reprocessable)
                 self.create_fields(entity_map, entity, map_value['fields'])
                 self.create_filters(entity_map, map_value.get('filters', {}))
 
@@ -69,9 +71,8 @@ class MapLoader:
             print(f"========================== {self.app_name} ==========================")
             with open(self.target_path, 'r', encoding='utf-8') as f:
                 stream = f.read()
-            # Get solution id
-            solution = Solution.objects.get(name=self.solution_name)
 
+            solution = Solution.objects.get(name=self.solution_name)
             yaml_map = yaml.load(stream, Loader=yaml.FullLoader)
             self.create_maps(yaml_map, solution, self.app_name, '1.0')
 

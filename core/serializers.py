@@ -51,6 +51,7 @@ class AppSerializer(serializers.ModelSerializer):
                 fields=('solution_id', 'name'))
         ]
 
+
 class AppVersionSerializer(serializers.ModelSerializer):
     """
     app version model serializer
@@ -154,8 +155,7 @@ class EntityMapSerializer(WritableNestedModelSerializer):
             {'field_type': str(models.FIELD_TYPES.VARCHAR), 'column_name': 'branch', 'alias': 'branch'}
         ]
 
-    # app_id = serializers.IntegerField(required=True, write_only=True)
-    app_id = serializers.IntegerField(required=True)
+    app_version = AppVersionSerializer(required=True)
     entity_id = serializers.IntegerField(required=True, write_only=True)
     fields = MappedFieldSerializer(many=True)
     metadata = SerializerMethodField()
@@ -164,7 +164,7 @@ class EntityMapSerializer(WritableNestedModelSerializer):
 
     class Meta:
         model = models.EntityMap
-        fields = ('id', 'name', 'app_id', 'entity_id', 'model', 'fields', 'metadata', 'filters',)
+        fields = ('id', 'name', 'app_version', 'entity_id', 'model', 'fields', 'metadata', 'filters',)
 
         validators = [
             UniqueTogetherValidator(

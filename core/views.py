@@ -87,10 +87,11 @@ class EntityMapView(viewsets.ModelViewSet):
 
     def get_queryset(self, *args, **kwargs):
         app_name = self.kwargs.get('app_name')
+        app_version = self.kwargs.get('app_version')
         map_name = self.kwargs.get('map_name')
 
-        if app_name and map_name:
-            return EntityMap.objects.filter(app__name=app_name, name=map_name)
+        if app_name and map_name and app_version:
+            return EntityMap.objects.filter(app_version__app__name=app_name, app_version__version=app_version, name=map_name)
 
         return EntityMap.objects.all()
 
