@@ -7,12 +7,12 @@ verify_ssl = true
 ipdb = "*"
 pytest = "*"
 pytest-django = "*"
-pyyaml = "*"
 pylint = "*"
 rope = "*"
 requests = "*"
 
 [packages]
+pyyaml = "*"
 djangorestframework = "==3.9.2"
 drf-writable-nested = "==0.5.1"
 Django = "==2.2"
