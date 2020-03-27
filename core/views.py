@@ -1,4 +1,7 @@
 import yaml
+import pytz
+import datetime
+from django.db.models import Q
 from rest_framework import viewsets, views
 from core.management.commands.import_data import EntityLoader
 from core.management.commands.import_map import MapLoader
@@ -52,6 +55,21 @@ class AppVersionView(viewsets.ModelViewSet):
     serializer_class = AppVersionSerializer
     queryset = AppVersion.objects.all().order_by('version')
 
+    def get_queryset(self, *args, **kwargs):
+        date_validity = self.kwargs.get('date_validity')
+        name = self.kwargs.get('name')
+
+        if name and date_validity:
+            date_validity = datetime.datetime.strptime(date_validity, '%Y-%m-%d %H:%M:%S.%fZ')
+            pst = pytz.timezone('UTC')
+            date_validity = pst.localize(date_validity)
+
+            query = AppVersion.objects.filter(app__name=name)\
+             .filter(date_begin_validity__lte=date_validity)\
+             .filter(Q(date_end_validity__isnull=True) | Q(date_end_validity__gte=date_validity))
+
+            return query.order_by('version')
+
 
 class EntityView(viewsets.ModelViewSet):
     """
@@ -91,7 +109,8 @@ class EntityMapView(viewsets.ModelViewSet):
         map_name = self.kwargs.get('map_name')
 
         if app_name and map_name and app_version:
-            return EntityMap.objects.filter(app_version__app__name=app_name, app_version__version=app_version, name=map_name)
+            return EntityMap.objects.filter(app_version__app__name=app_name, app_version__version=app_version,
+                                            name=map_name)
 
         return EntityMap.objects.all()
 
