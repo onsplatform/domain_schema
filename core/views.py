@@ -57,14 +57,14 @@ class AppVersionView(viewsets.ModelViewSet):
 
     def get_queryset(self, *args, **kwargs):
         date_validity = self.kwargs.get('date_validity')
-        name = self.kwargs.get('name')
+        process_id = self.kwargs.get('process_id')
 
-        if name and date_validity:
+        if process_id and date_validity:
             date_validity = datetime.datetime.strptime(date_validity, '%Y-%m-%d %H:%M:%S.%fZ')
             pst = pytz.timezone('UTC')
             date_validity = pst.localize(date_validity)
 
-            query = AppVersion.objects.filter(app__name=name)\
+            query = AppVersion.objects.filter(process_id=process_id)\
              .filter(date_begin_validity__lte=date_validity)\
              .filter(Q(date_end_validity__isnull=True) | Q(date_end_validity__gte=date_validity))
 
