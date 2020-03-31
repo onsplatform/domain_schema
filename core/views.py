@@ -60,7 +60,7 @@ class AppVersionView(viewsets.ModelViewSet):
         process_id = self.kwargs.get('process_id')
 
         if process_id and date_validity:
-            date_validity = datetime.datetime.strptime(date_validity, '%Y-%m-%d %H:%M:%S.%fZ')
+            date_validity = datetime.datetime.strptime(date_validity, '%Y-%m-%d %H:%M:%SZ')
             pst = pytz.timezone('UTC')
             date_validity = pst.localize(date_validity)
 
@@ -68,7 +68,7 @@ class AppVersionView(viewsets.ModelViewSet):
              .filter(date_begin_validity__lte=date_validity)\
              .filter(Q(date_end_validity__isnull=True) | Q(date_end_validity__gte=date_validity))
 
-            return query.order_by('version')
+            return query.order_by('-date_begin_validity')
 
 
 class EntityView(viewsets.ModelViewSet):
