@@ -1,10 +1,14 @@
 import yaml
 import pytz
 import datetime
+
 from django.db.models import Q
-from rest_framework import viewsets, views
+
 from core.management.commands.import_data import EntityLoader
 from core.management.commands.import_map import MapLoader
+
+from rest_framework import viewsets, views
+from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser
 
@@ -53,22 +57,28 @@ class AppVersionView(viewsets.ModelViewSet):
     app version view
     """
     serializer_class = AppVersionSerializer
-    queryset = AppVersion.objects.all().order_by('version')
+    queryset = AppVersion.objects.all().order_by('-date_begin_validity')
 
     def get_queryset(self, *args, **kwargs):
         date_validity = self.kwargs.get('date_validity')
         process_id = self.kwargs.get('process_id')
+        app_name = self.kwargs.get('app_name')
+        version = self.kwargs.get('version')
+
+        if app_name and version:
+            return AppVersion.objects.filter(app__name=app_name, version=version)
 
         if process_id and date_validity:
             date_validity = datetime.datetime.strptime(date_validity, '%Y-%m-%d %H:%M:%SZ')
             pst = pytz.timezone('UTC')
             date_validity = pst.localize(date_validity)
 
-            query = AppVersion.objects.filter(process_id=process_id)\
+            return AppVersion.objects.filter(process_id=process_id)\
              .filter(date_begin_validity__lte=date_validity)\
-             .filter(Q(date_end_validity__isnull=True) | Q(date_end_validity__gte=date_validity))
+             .filter(Q(date_end_validity__isnull=True) | Q(date_end_validity__gte=date_validity))\
+             .order_by('-date_begin_validity')
 
-            return query.order_by('-date_begin_validity')
+        return AppVersion.objects.all().order_by('-date_begin_validity')
 
 
 class EntityView(viewsets.ModelViewSet):

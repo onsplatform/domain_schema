@@ -60,6 +60,7 @@ class AppVersion(models.Model):
     process_id = models.UUIDField(null=True)
     date_begin_validity = models.DateTimeField(null=True)
     date_end_validity = models.DateTimeField(null=True)
+    active = models.BooleanField(null=True)
 
     class Meta:
         constraints = [
