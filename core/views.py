@@ -69,7 +69,7 @@ class AppVersionView(viewsets.ModelViewSet):
             return AppVersion.objects.filter(app__name=app_name, version=version)
 
         if process_id and date_validity:
-            date_validity = datetime.datetime.strptime(date_validity, '%Y-%m-%d %H:%M:%SZ')
+            date_validity = datetime.datetime.strptime(date_validity, '%Y-%m-%d %H:%M:%S.%fZ')
             pst = pytz.timezone('UTC')
             date_validity = pst.localize(date_validity)
 
