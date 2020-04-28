@@ -102,6 +102,8 @@ class BranchView(viewsets.ModelViewSet):
 
         if solution_name and branch_name:
             return Branch.objects.filter(solution_name=solution_name, name=branch_name)
+        if branch_name:
+            return Branch.objects.filter(name=branch_name)
 
         return Branch.objects.all()
 

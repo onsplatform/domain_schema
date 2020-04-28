@@ -33,7 +33,7 @@ class BranchSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Branch
         fields = ('id', 'name', 'solution_id', 'created_at', 'deleted', 'description',
-                  'meta_instance_id', 'modified', 'owner', 'started_at', 'status')
+                  'meta_instance_id', 'modified', 'owner', 'started_at', 'status', 'disabled')
 
 
 class AppSerializer(serializers.ModelSerializer):

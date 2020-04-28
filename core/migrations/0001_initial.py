@@ -166,7 +166,7 @@ class Migration(migrations.Migration):
             LANGUAGE plpgsql
             AS $function$
                 BEGIN
-                    EXECUTE 'INSERT INTO ' || TG_RELID::regclass::text || '_history SELECT public.uuid_generate_v4() as version_id, ($1).*' USING OLD;
+                    EXECUTE 'INSERT INTO ' || TG_RELID::regclass::text || '_history SELECT public.uuid_generate_v4() as version_id, (($2).modified - interval ''1 milliseconds'') as modified_until, ($1).*' USING old, new;
                     RETURN NEW;
                 END;
             $function$

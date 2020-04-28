@@ -1,5 +1,5 @@
 import uuid
-from datetime import datetime
+
 from enum import Enum
 
 from django.db import models, transaction
@@ -147,6 +147,9 @@ class Migration(models.Model):
             field_type=FIELD_TYPES.UUID,
             primary_key=True,
             default='uuid_generate_v4()'
+        ).with_column(
+            name='modified_until',
+            field_type=FIELD_TYPES.DATE,
         ).with_column(
             name='id',
             field_type=FIELD_TYPES.UUID,
@@ -356,6 +359,7 @@ class Branch(models.Model):
     meta_instance_id = models.UUIDField(null=True)
     modified = models.DateTimeField(null=True)
     created_at = models.DateTimeField(null=True)
+    disabled = models.DateTimeField(null=True)
 
     class Meta:
         constraints = [

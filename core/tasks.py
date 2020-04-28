@@ -5,7 +5,7 @@ from django.db import connection, transaction
 from domain_schema.celery import app
 from .models import Migration
 
-TRIGGER_TEMPL = """
+TRIGGER_TEMPL = """ 
     CREATE TRIGGER save_{entity}_history
         BEFORE UPDATE ON {schema}.{table}
         FOR EACH ROW
