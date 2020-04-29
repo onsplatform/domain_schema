@@ -2,6 +2,8 @@ import yaml
 import pytz
 import datetime
 
+from collections import defaultdict
+
 from django.db.models import Q
 from django.db.models import Subquery
 
@@ -130,14 +132,23 @@ class AppVersionByReprocessableEntityView(views.APIView):
     """
     App_version by reprocessable entities
     {
-        'types': [ 'parametrotaxa', 'evento' ],
-        'tag': 'onssagercalculouge:1.0'
+        "types": [
+            "parametrotaxa",
+            "eventomudancaestadooperativo",
+            "potenciaunidadegeradora"
+        ],
+        "tag": "onssagercalculouge:1.0"
     }
 
     return:
     {
-        'onssagercalculouge:1.0': ['e_eventomudaestdopert', 'e_parametrotaxa'],
-        'onssagercalculouge:2.0': ['e_eventomudaestdopert', 'e_parametrotaxa']
+        "onssagercalculouge:1.0": [
+            "e_potuge",
+            "e_eventomudaestdopert"
+        ],
+        "onssagercalculouge:2.0": [
+            "e_potuge"
+        ]
     }
     """
 
@@ -146,13 +157,18 @@ class AppVersionByReprocessableEntityView(views.APIView):
         types = request.data['types']
 
         tables = EntityMap.objects.filter(name__in=types, app_version__tag=tag).values('entity__name')
-        app_versions = {
-            e['app_version__tag'] for e in
-            EntityMap.objects.filter(reprocessable=True, entity__name__in=Subquery(tables)).values(
-                'app_version__tag', 'entity__name')
-        }
 
-        return Response(data=app_versions, status=200)
+        app_versions = [
+            (e['app_version__tag'], e['entity__name'])
+            for e in EntityMap.objects.filter(reprocessable=True, entity__name__in=Subquery(tables)).values(
+                'app_version__tag', 'entity__name')
+        ]
+
+        dic = defaultdict(set)
+        for k, v in app_versions:
+            dic[k].update(v.split(','))
+
+        return Response(data=dic, status=200)
 
 
 class CreateEntityView(views.APIView):
