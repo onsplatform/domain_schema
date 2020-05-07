@@ -2,7 +2,10 @@ import yaml
 import pytz
 import datetime
 
+from collections import defaultdict
+
 from django.db.models import Q
+from django.db.models import Subquery
 
 from core.management.commands.import_data import EntityLoader
 from core.management.commands.import_map import MapLoader
@@ -73,10 +76,10 @@ class AppVersionView(viewsets.ModelViewSet):
             pst = pytz.timezone('UTC')
             date_validity = pst.localize(date_validity)
 
-            return AppVersion.objects.filter(process_id=process_id)\
-             .filter(date_begin_validity__lte=date_validity)\
-             .filter(Q(date_end_validity__isnull=True) | Q(date_end_validity__gte=date_validity))\
-             .order_by('-date_begin_validity')
+            return AppVersion.objects.filter(process_id=process_id) \
+                .filter(date_begin_validity__lte=date_validity) \
+                .filter(Q(date_end_validity__isnull=True) | Q(date_end_validity__gte=date_validity)) \
+                .order_by('-date_begin_validity')
 
         return AppVersion.objects.all().order_by('-date_begin_validity')
 
@@ -123,6 +126,49 @@ class EntityMapView(viewsets.ModelViewSet):
                                             name=map_name)
 
         return EntityMap.objects.all()
+
+
+class AppVersionByReprocessableEntityView(views.APIView):
+    """
+    App_version by reprocessable entities
+    {
+        "types": [
+            "parametrotaxa",
+            "eventomudancaestadooperativo",
+            "potenciaunidadegeradora"
+        ],
+        "tag": "onssagercalculouge:1.0"
+    }
+
+    return:
+    {
+        "onssagercalculouge:1.0": [
+            "e_potuge",
+            "e_eventomudaestdopert"
+        ],
+        "onssagercalculouge:2.0": [
+            "e_potuge"
+        ]
+    }
+    """
+
+    def post(self, request):
+        tag = request.data['tag']
+        types = request.data['types']
+
+        tables = EntityMap.objects.filter(name__in=types, app_version__tag=tag).values('entity__name')
+
+        app_versions = [
+            (e['app_version__tag'], e['entity__name'])
+            for e in EntityMap.objects.filter(reprocessable=True, entity__name__in=Subquery(tables)).values(
+                'app_version__tag', 'entity__name')
+        ]
+
+        dic = defaultdict(set)
+        for k, v in app_versions:
+            dic[k].update(v.split(','))
+
+        return Response(data=dic, status=200)
 
 
 class CreateEntityView(views.APIView):
