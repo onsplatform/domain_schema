@@ -35,6 +35,14 @@ class BranchSerializer(serializers.ModelSerializer):
         fields = ('id', 'name', 'solution_id', 'created_at', 'deleted', 'description',
                   'meta_instance_id', 'modified', 'owner', 'started_at', 'status')
 
+class ReprocessSerializer(serializers.ModelSerializer):
+    """
+    reprocess model serializer
+    """
+    class Meta:
+        model = models.Reprocess
+        fields = ('id', 'solution_id', 'tag', 'reprocess_instance_id', 'date_created',
+                  'modified', 'is_reprocessing')
 
 class AppSerializer(serializers.ModelSerializer):
     """

@@ -15,9 +15,9 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser
 
-from core.models import Solution, App, AppVersion, Entity, EntityMap, Branch
+from core.models import Solution, App, AppVersion, Entity, EntityMap, Branch, Reprocess
 from core.serializers import SolutionSerializer, AppSerializer, AppVersionSerializer, EntitySerializer, \
-    EntityMapSerializer, BranchSerializer
+    EntityMapSerializer, BranchSerializer, ReprocessSerializer
 
 __all__ = ['SolutionView', 'AppView', 'EntityView', 'EntityMapView', ]
 
@@ -108,6 +108,32 @@ class BranchView(viewsets.ModelViewSet):
 
         return Branch.objects.all()
 
+class ReprocessView(views.APIView):
+    """
+    reprocess model view
+    """
+    serializer_class = ReprocessSerializer
+
+    def post(self, request):
+        solution = request.data['solution']
+        tag = request.data['tag']
+        reprocess_instance_id = request.data['reprocess_instance_id']
+        action = request.data['action']
+
+        reprocess_control = Reprocess.objects.filter(solution_id=solution, tag=tag, reprocess_instance_id=reprocess_instance_id).first()
+        if action == 'start':
+            if reprocess_control == None:
+                reprocess_control = Reprocess(solution_id=solution, tag=tag, reprocess_instance_id=reprocess_instance_id, is_reprocessing=True)
+            else:
+                reprocess_control.is_reprocessing = True
+            reprocess_control.save()
+        elif action == 'finish':
+            reprocess_control.is_reprocessing = False
+            reprocess_control.save()
+        else:
+            Response(status=500)
+
+        return Response(status=200)
 
 class EntityMapView(viewsets.ModelViewSet):
     """
