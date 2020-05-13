@@ -15,9 +15,9 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser
 
-from core.models import Solution, App, AppVersion, Entity, EntityMap, Branch
+from core.models import Solution, App, AppVersion, Entity, EntityMap, Branch, Reprocess
 from core.serializers import SolutionSerializer, AppSerializer, AppVersionSerializer, EntitySerializer, \
-    EntityMapSerializer, BranchSerializer
+    EntityMapSerializer, BranchSerializer, ReprocessSerializer
 
 __all__ = ['SolutionView', 'AppView', 'EntityView', 'EntityMapView', ]
 
@@ -107,6 +107,47 @@ class BranchView(viewsets.ModelViewSet):
             return Branch.objects.filter(solution_name=solution_name, name=branch_name)
 
         return Branch.objects.all()
+
+
+class UpsertReprocessView(views.APIView):
+    """
+    reprocess model view
+    """
+    serializer_class = ReprocessSerializer
+
+    def post(self, request):
+        solution = request.data['solution']
+        tag = request.data['tag']
+        reprocess_instance_id = request.data['reprocess_instance_id']
+        action_ = request.data['action']
+
+        reprocess_control = Reprocess.objects.filter(solution_id=solution, tag=tag, reprocess_instance_id=reprocess_instance_id).first()
+        if action_ == 'start':
+            if reprocess_control is None:
+                reprocess_control = Reprocess(solution_id=solution, tag=tag, reprocess_instance_id=reprocess_instance_id, is_reprocessing=True)
+            else:
+                reprocess_control.is_reprocessing = True
+            reprocess_control.save()
+        elif action_ == 'finish':
+            reprocess_control.is_reprocessing = False
+            reprocess_control.save()
+        else:
+            Response(status=500)
+
+        return Response(status=200)
+
+
+class ReprocessView(viewsets.ModelViewSet):
+    """
+    reprocess model view
+    """
+    serializer_class = ReprocessSerializer
+    queryset = Reprocess.objects.all().order_by('id')
+
+    def get_queryset(self, *args, **kwargs):
+        solution_id = self.kwargs.get('solution_id')
+        return Reprocess.objects.filter(solution_id=solution_id, is_reprocessing=True)\
+            .values('tag', 'reprocess_instance_id', 'is_reprocessing')
 
 
 class EntityMapView(viewsets.ModelViewSet):
