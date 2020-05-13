@@ -18,6 +18,7 @@ router.register('app/(?P<solution_id>.+)/(?P<name>.+)', AppView)
 router.register('appversion/byprocessidanddate/(?P<process_id>.+)/(?P<date_validity>.+)', AppVersionView)
 router.register('appversion', AppVersionView)
 router.register('appversion/(?P<app_name>.+)/(?P<version>.+)', AppVersionView)
+router.register('reprocess/actives/bysolutionid/(?P<solution_id>.+)', ReprocessView)
 
 router.register('branch', BranchView)
 router.register('branch/(?P<solution_name>.+)/(?P<branch_name>.+)', BranchView)

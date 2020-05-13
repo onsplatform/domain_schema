@@ -108,7 +108,8 @@ class BranchView(viewsets.ModelViewSet):
 
         return Branch.objects.all()
 
-class ReprocessView(views.APIView):
+
+class UpsertReprocessView(views.APIView):
     """
     reprocess model view
     """
@@ -118,22 +119,36 @@ class ReprocessView(views.APIView):
         solution = request.data['solution']
         tag = request.data['tag']
         reprocess_instance_id = request.data['reprocess_instance_id']
-        action = request.data['action']
+        action_ = request.data['action']
 
         reprocess_control = Reprocess.objects.filter(solution_id=solution, tag=tag, reprocess_instance_id=reprocess_instance_id).first()
-        if action == 'start':
-            if reprocess_control == None:
+        if action_ == 'start':
+            if reprocess_control is None:
                 reprocess_control = Reprocess(solution_id=solution, tag=tag, reprocess_instance_id=reprocess_instance_id, is_reprocessing=True)
             else:
                 reprocess_control.is_reprocessing = True
             reprocess_control.save()
-        elif action == 'finish':
+        elif action_ == 'finish':
             reprocess_control.is_reprocessing = False
             reprocess_control.save()
         else:
             Response(status=500)
 
         return Response(status=200)
+
+
+class ReprocessView(viewsets.ModelViewSet):
+    """
+    reprocess model view
+    """
+    serializer_class = ReprocessSerializer
+    queryset = Reprocess.objects.all().order_by('id')
+
+    def get_queryset(self, *args, **kwargs):
+        solution_id = self.kwargs.get('solution_id')
+        return Reprocess.objects.filter(solution_id=solution_id, is_reprocessing=True)\
+            .values('tag', 'reprocess_instance_id', 'is_reprocessing')
+
 
 class EntityMapView(viewsets.ModelViewSet):
     """

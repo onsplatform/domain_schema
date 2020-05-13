@@ -3,7 +3,7 @@ from django.urls import path, include
 from rest_framework import routers
 
 from core.router import router as core_router
-from core.views import CreateEntityView, CreateMapMapView, AppVersionByReprocessableEntityView, ReprocessView
+from core.views import CreateEntityView, CreateMapMapView, AppVersionByReprocessableEntityView, UpsertReprocessView
 
 api_version = 'api/v1/'
 
@@ -13,6 +13,6 @@ urlpatterns = [
     path(api_version + 'create/entity/', CreateEntityView.as_view()),
     path(api_version + 'create/map/', CreateMapMapView.as_view()),
     path(api_version + 'appversion/byreprocessableentities', AppVersionByReprocessableEntityView.as_view()),
-    path(api_version + 'reprocess', ReprocessView.as_view())
+    path(api_version + 'reprocess', UpsertReprocessView.as_view()),
 ]
 
