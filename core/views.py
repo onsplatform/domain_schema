@@ -114,7 +114,7 @@ class UpsertExecutionView(views.APIView):
     def upsert(self, action, execution, new_execution, execution_attr):
         if action not in ['start', 'finish']:
             return False
-        
+
         if execution is None:
             execution = new_execution
         setattr(execution, execution_attr, action == 'start')
