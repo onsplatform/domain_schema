@@ -20,7 +20,7 @@ class SolutionSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = models.Solution
-        fields = ('id', 'name', 'description', 'is_reprocessing', 'is_reprocessable', )
+        fields = ('id', 'name', 'description', 'is_reprocessing', 'is_reprocessable',)
 
 
 class BranchSerializer(serializers.ModelSerializer):
@@ -35,14 +35,28 @@ class BranchSerializer(serializers.ModelSerializer):
         fields = ('id', 'name', 'solution_id', 'created_at', 'deleted', 'description',
                   'meta_instance_id', 'modified', 'owner', 'started_at', 'status')
 
+
 class ReprocessSerializer(serializers.ModelSerializer):
     """
     reprocess model serializer
     """
+
     class Meta:
         model = models.Reprocess
         fields = ('id', 'solution_id', 'tag', 'reprocess_instance_id', 'date_created',
                   'modified', 'is_reprocessing')
+
+
+class ReproductionSerializer(serializers.ModelSerializer):
+    """
+    reproduction model serializer
+    """
+
+    class Meta:
+        model = models.Reprocess
+        fields = ('id', 'solution_id', 'tag', 'reproduction_instance_id', 'date_created',
+                  'modified', 'is_reproducing')
+
 
 class AppSerializer(serializers.ModelSerializer):
     """
@@ -74,6 +88,7 @@ class AppVersionSerializer(serializers.ModelSerializer):
                 queryset=models.AppVersion.objects.all(),
                 fields=('app_id', 'version'))
         ]
+
 
 class FieldSerializer(serializers.ModelSerializer):
     """

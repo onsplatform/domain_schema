@@ -79,6 +79,17 @@ class Reprocess(models.Model):
     modified = models.DateTimeField(auto_now=True)
     is_reprocessing = models.BooleanField(null=True)
 
+class Reproduction(models.Model):
+    """
+    reproduction control model
+    """
+    solution = models.ForeignKey(Solution, on_delete=models.CASCADE, related_name='reproductions')
+    tag = models.CharField(max_length=255)
+    reproduction_instance_id = models.UUIDField(null=False)
+    date_created = models.DateTimeField(auto_now_add=True)
+    modified = models.DateTimeField(auto_now=True)
+    is_reproducing = models.BooleanField(null=True)
+
 class Entity(models.Model):
     """
     Entity model. This is the Entity that will be used in the solution. (USINA)

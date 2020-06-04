@@ -15,9 +15,9 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser
 
-from core.models import Solution, App, AppVersion, Entity, EntityMap, Branch, Reprocess
+from core.models import Solution, App, AppVersion, Entity, EntityMap, Branch, Reprocess, Reproduction
 from core.serializers import SolutionSerializer, AppSerializer, AppVersionSerializer, EntitySerializer, \
-    EntityMapSerializer, BranchSerializer, ReprocessSerializer
+    EntityMapSerializer, BranchSerializer, ReprocessSerializer, ReproductionSerializer
 
 __all__ = ['SolutionView', 'AppView', 'EntityView', 'EntityMapView', ]
 
@@ -109,32 +109,61 @@ class BranchView(viewsets.ModelViewSet):
         return Branch.objects.all()
 
 
-class UpsertReprocessView(views.APIView):
+class UpsertExecutionView(views.APIView):
+
+    def upsert(self, action, execution, new_execution, execution_attr):
+        if action not in ['start', 'finish']:
+            return False
+        
+        if execution is None:
+            execution = new_execution
+        setattr(execution, execution_attr, action == 'start')
+        execution.save()
+        return True
+
+
+class UpsertReproductionView(UpsertExecutionView):
+    """
+    reproduction model view
+    """
+    serializer_class = ReproductionSerializer
+
+    def post(self, request):
+        tag = request.data['tag']
+        action = request.data['action']
+        solution = request.data['solution']
+        reproduction_instance_id = request.data['reproduction_instance_id']
+
+        execution = Reproduction.objects.filter(solution_id=solution, tag=tag,
+                                                reproduction_instance_id=reproduction_instance_id).first()
+        new_execution = Reproduction(solution_id=solution, tag=tag, reproduction_instance_id=reproduction_instance_id,
+                                     is_reproducing=True)
+        if self.upsert(action, execution, new_execution, 'is_reproducing'):
+            return Response(status=200)
+
+        Response(status=500)
+
+
+class UpsertReprocessView(UpsertExecutionView):
     """
     reprocess model view
     """
     serializer_class = ReprocessSerializer
 
     def post(self, request):
-        solution = request.data['solution']
         tag = request.data['tag']
+        action = request.data['action']
+        solution = request.data['solution']
         reprocess_instance_id = request.data['reprocess_instance_id']
-        action_ = request.data['action']
 
-        reprocess_control = Reprocess.objects.filter(solution_id=solution, tag=tag, reprocess_instance_id=reprocess_instance_id).first()
-        if action_ == 'start':
-            if reprocess_control is None:
-                reprocess_control = Reprocess(solution_id=solution, tag=tag, reprocess_instance_id=reprocess_instance_id, is_reprocessing=True)
-            else:
-                reprocess_control.is_reprocessing = True
-            reprocess_control.save()
-        elif action_ == 'finish':
-            reprocess_control.is_reprocessing = False
-            reprocess_control.save()
-        else:
-            Response(status=500)
+        execution = Reprocess.objects.filter(solution_id=solution, tag=tag,
+                                             reprocess_instance_id=reprocess_instance_id).first()
+        new_execution = Reprocess(solution_id=solution, tag=tag, reprocess_instance_id=reprocess_instance_id,
+                                  is_reprocessing=True)
+        if self.upsert(action, execution, new_execution, 'is_reprocessing'):
+            return Response(status=200)
 
-        return Response(status=200)
+        Response(status=500)
 
 
 class ReprocessView(viewsets.ModelViewSet):
@@ -146,8 +175,21 @@ class ReprocessView(viewsets.ModelViewSet):
 
     def get_queryset(self, *args, **kwargs):
         solution_id = self.kwargs.get('solution_id')
-        return Reprocess.objects.filter(solution_id=solution_id, is_reprocessing=True)\
-            .values('tag', 'reprocess_instance_id', 'is_reprocessing')
+        return Reprocess.objects.filter(solution_id=solution_id, is_reprocessing=True) \
+            .values('tag', 'reprocess_instance_id', 'is_running')
+
+
+class ReproductionView(viewsets.ModelViewSet):
+    """
+    reproduction model view
+    """
+    serializer_class = ReproductionSerializer
+    queryset = Reproduction.objects.all().order_by('id')
+
+    def get_queryset(self, *args, **kwargs):
+        solution_id = self.kwargs.get('solution_id')
+        return Reproduction.objects.filter(solution_id=solution_id, is_reproducing=True) \
+            .values('tag', 'reproduction_instance_id', 'is_reproducing')
 
 
 class EntityMapView(viewsets.ModelViewSet):

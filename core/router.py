@@ -3,7 +3,8 @@ from rest_framework import routers
 from rest_framework.schemas import get_schema_view
 from rest_framework_swagger.renderers import SwaggerUIRenderer, OpenAPIRenderer
 
-from core.views import CreateEntityView, SolutionView, AppView, AppVersionView, EntityView, EntityMapView, BranchView, ReprocessView
+from core.views import CreateEntityView, SolutionView, AppView, AppVersionView, EntityView, EntityMapView, BranchView, \
+    ReprocessView, ReproductionView
 
 __all__ = ['router', ]
 
@@ -19,6 +20,7 @@ router.register('appversion/byprocessidanddate/(?P<process_id>.+)/(?P<date_valid
 router.register('appversion', AppVersionView)
 router.register('appversion/(?P<app_name>.+)/(?P<version>.+)', AppVersionView)
 router.register('reprocess/actives/bysolutionid/(?P<solution_id>.+)', ReprocessView)
+router.register('reproduction/actives/bysolutionid/(?P<solution_id>.+)', ReproductionView)
 
 router.register('branch', BranchView)
 router.register('branch/(?P<solution_name>.+)/(?P<branch_name>.+)', BranchView)

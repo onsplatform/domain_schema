@@ -8,7 +8,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 SECRET_KEY = 'cle=^s5#t8f6ja%929hz*d83k*z_5&x_eyvp3^a2p&*+hv@80w'
 
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = ['*', ]
 
@@ -102,6 +102,9 @@ USE_L10N = True
 
 USE_TZ = True
 
+# All settings common to all environments
+PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
 STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(PROJECT_ROOT, 'static')
 
 MIGRATION_DIALECT = MigrationDialect
