@@ -20,7 +20,7 @@ class SolutionSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = models.Solution
-        fields = ('id', 'name', 'description', 'is_reprocessing', 'is_reprocessable', )
+        fields = ('id', 'name', 'description', 'is_reprocessing', 'is_reprocessable',)
 
 
 class BranchSerializer(serializers.ModelSerializer):
@@ -66,6 +66,7 @@ class AppVersionSerializer(serializers.ModelSerializer):
                 queryset=models.AppVersion.objects.all(),
                 fields=('app_id', 'version'))
         ]
+
 
 class FieldSerializer(serializers.ModelSerializer):
     """
@@ -151,9 +152,13 @@ class EntityMapSerializer(WritableNestedModelSerializer):
             {'field_type': str(models.FIELD_TYPES.BOOLEAN), 'column_name': 'deleted', 'alias': 'deleted'},
             {'field_type': str(models.FIELD_TYPES.VARCHAR), 'column_name': 'meta_instance_id', 'alias': 'instance_id'},
             {'field_type': str(models.FIELD_TYPES.DATE), 'column_name': 'modified', 'alias': 'modified_at'},
-            {'field_type': str(models.FIELD_TYPES.DATE), 'column_name': 'date_created', 'alias': 'created_at'},
+                {'field_type': str(models.FIELD_TYPES.DATE), 'column_name': 'date_created', 'alias': 'created_at'},
             {'field_type': str(models.FIELD_TYPES.VARCHAR), 'column_name': 'from_id', 'alias': 'from_id'},
-            {'field_type': str(models.FIELD_TYPES.VARCHAR), 'column_name': 'branch', 'alias': 'branch'}
+            {'field_type': str(models.FIELD_TYPES.VARCHAR), 'column_name': 'branch', 'alias': 'branch'},
+            {'field_type': str(models.FIELD_TYPES.VARCHAR), 'column_name': 'reproduction_id',
+             'alias': 'reproduction_id'},
+            {'field_type': str(models.FIELD_TYPES.VARCHAR), 'column_name': 'reproduction_from_id',
+             'alias': 'reproduction_from_id'}
         ]
 
     app_version = AppVersionSerializer(required=True)

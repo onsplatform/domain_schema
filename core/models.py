@@ -50,6 +50,7 @@ class App(models.Model):
                 fields=["solution", "name"], name='unique_solution_app')
         ]
 
+
 class AppVersion(models.Model):
     """
     app version model
@@ -179,6 +180,12 @@ class Migration(models.Model):
         ).with_column(
             name='related_id',
             field_type=FIELD_TYPES.UUID
+        ).with_column(
+            name='reproduction_id',
+            field_type=FIELD_TYPES.UUID
+        ).with_column(
+            name='reproduction_from_id',
+            field_type=FIELD_TYPES.UUID
         )
 
     def _create_table(self, migration):
@@ -221,6 +228,12 @@ class Migration(models.Model):
             field_type=FIELD_TYPES.UUID,
         ).with_column(
             name='related_id',
+            field_type=FIELD_TYPES.UUID
+        ).with_column(
+            name='reproduction_id',
+            field_type=FIELD_TYPES.UUID
+        ).with_column(
+            name='reproduction_from_id',
             field_type=FIELD_TYPES.UUID
         )
 
@@ -283,7 +296,7 @@ class EntityMap(models.Model):
     entity = models.ForeignKey(Entity, on_delete=models.CASCADE, related_name='maps')
     name = models.CharField(max_length=50)
     reprocessable = models.BooleanField(default=False)
-    
+
     class Meta:
         unique_together = (("app_version", "name"),)
 
