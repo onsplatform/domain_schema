@@ -1,5 +1,5 @@
 import uuid
-from datetime import datetime
+
 from enum import Enum
 
 from django.db import models, transaction
@@ -49,6 +49,7 @@ class App(models.Model):
             models.UniqueConstraint(
                 fields=["solution", "name"], name='unique_solution_app')
         ]
+
 
 class AppVersion(models.Model):
     """
@@ -169,6 +170,9 @@ class Migration(models.Model):
             primary_key=True,
             default='uuid_generate_v4()'
         ).with_column(
+            name='modified_until',
+            field_type=FIELD_TYPES.DATE,
+        ).with_column(
             name='id',
             field_type=FIELD_TYPES.UUID,
             references=(self.entity.table, 'id'),
@@ -196,6 +200,12 @@ class Migration(models.Model):
             field_type=FIELD_TYPES.UUID,
         ).with_column(
             name='related_id',
+            field_type=FIELD_TYPES.UUID
+        ).with_column(
+            name='reproduction_id',
+            field_type=FIELD_TYPES.UUID
+        ).with_column(
+            name='reproduction_from_id',
             field_type=FIELD_TYPES.UUID
         )
 
@@ -239,6 +249,12 @@ class Migration(models.Model):
             field_type=FIELD_TYPES.UUID,
         ).with_column(
             name='related_id',
+            field_type=FIELD_TYPES.UUID
+        ).with_column(
+            name='reproduction_id',
+            field_type=FIELD_TYPES.UUID
+        ).with_column(
+            name='reproduction_from_id',
             field_type=FIELD_TYPES.UUID
         )
 
@@ -301,7 +317,7 @@ class EntityMap(models.Model):
     entity = models.ForeignKey(Entity, on_delete=models.CASCADE, related_name='maps')
     name = models.CharField(max_length=50)
     reprocessable = models.BooleanField(default=False)
-    
+
     class Meta:
         unique_together = (("app_version", "name"),)
 
@@ -377,6 +393,7 @@ class Branch(models.Model):
     meta_instance_id = models.UUIDField(null=True)
     modified = models.DateTimeField(null=True)
     created_at = models.DateTimeField(null=True)
+    disabled = models.DateTimeField(null=True)
 
     class Meta:
         constraints = [

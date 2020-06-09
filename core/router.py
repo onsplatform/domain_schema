@@ -24,6 +24,7 @@ router.register('reproduction/actives/bysolutionid/(?P<solution_id>.+)', Reprodu
 
 router.register('branch', BranchView)
 router.register('branch/(?P<solution_name>.+)/(?P<branch_name>.+)', BranchView)
+router.register('branchbyname/(?P<branch_name>.+)', BranchView)
 router.register('entity', EntityView)
 router.register('entitymap', EntityMapView)
 router.register('entitymap/(?P<app_name>.+)/(?P<app_version>.+)/(?P<map_name>.+)', EntityMapView)
