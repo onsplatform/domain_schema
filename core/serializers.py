@@ -36,6 +36,28 @@ class BranchSerializer(serializers.ModelSerializer):
                   'meta_instance_id', 'modified', 'owner', 'started_at', 'status', 'disabled')
 
 
+class ReprocessSerializer(serializers.ModelSerializer):
+    """
+    reprocess model serializer
+    """
+
+    class Meta:
+        model = models.Reprocess
+        fields = ('id', 'solution_id', 'tag', 'reprocess_instance_id', 'date_created',
+                  'modified', 'is_reprocessing')
+
+
+class ReproductionSerializer(serializers.ModelSerializer):
+    """
+    reproduction model serializer
+    """
+
+    class Meta:
+        model = models.Reprocess
+        fields = ('id', 'solution_id', 'tag', 'reproduction_instance_id', 'date_created',
+                  'modified', 'is_reproducing')
+
+
 class AppSerializer(serializers.ModelSerializer):
     """
     app model serializer

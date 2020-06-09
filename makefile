@@ -1,6 +1,9 @@
 run:
 	@python manage.py runserver 8002
 
+collectstatic:
+	@python manage.py collectstatic --noinput
+
 test:
 	@pytest -s
 

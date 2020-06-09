@@ -69,6 +69,27 @@ class AppVersion(models.Model):
                 fields=["app", "version"], name='unique_app_version')
         ]
 
+class Reprocess(models.Model):
+    """
+    reprocess control model
+    """
+    solution = models.ForeignKey(Solution, on_delete=models.CASCADE, related_name='reprocesses')
+    tag = models.CharField(max_length=255)
+    reprocess_instance_id = models.UUIDField(null=False)
+    date_created = models.DateTimeField(auto_now_add=True)
+    modified = models.DateTimeField(auto_now=True)
+    is_reprocessing = models.BooleanField(null=True)
+
+class Reproduction(models.Model):
+    """
+    reproduction control model
+    """
+    solution = models.ForeignKey(Solution, on_delete=models.CASCADE, related_name='reproductions')
+    tag = models.CharField(max_length=255)
+    reproduction_instance_id = models.UUIDField(null=False)
+    date_created = models.DateTimeField(auto_now_add=True)
+    modified = models.DateTimeField(auto_now=True)
+    is_reproducing = models.BooleanField(null=True)
 
 class Entity(models.Model):
     """
