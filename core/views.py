@@ -6,6 +6,7 @@ from collections import defaultdict
 
 from django.db.models import Q
 from django.db.models import Subquery
+from django.http import HttpResponse
 
 from core.management.commands.import_data import EntityLoader
 from core.management.commands.import_map import MapLoader
@@ -99,12 +100,19 @@ class BranchView(viewsets.ModelViewSet):
     serializer_class = BranchSerializer
     queryset = Branch.objects.all().order_by('name')
 
+    def update(self, request, *args, **kwargs):
+        if request.data['disabled'] and request.data['name'] == 'master':
+            return HttpResponse(status=409, reason="It is not allowed to disable branch master")
+        else:
+            return super().update(request, *args, **kwargs)
+
     def get_queryset(self, *args, **kwargs):
         solution_name = self.kwargs.get('solution_name')
         branch_name = self.kwargs.get('branch_name')
 
         if solution_name and branch_name:
-            return Branch.objects.filter(solution_name=solution_name, name=branch_name)
+            solution = Solution.objects.get(name=solution_name)
+            return Branch.objects.filter(solution_id=solution.id, name=branch_name)
         if branch_name:
             return Branch.objects.filter(name=branch_name)
 
@@ -143,7 +151,7 @@ class UpsertReproductionView(UpsertExecutionView):
         if self.upsert(action, execution, new_execution, 'is_reproducing'):
             return Response(status=200)
 
-        Response(status=500)
+        return Response(status=500)
 
 
 class UpsertReprocessView(UpsertExecutionView):
