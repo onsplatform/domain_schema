@@ -39,7 +39,7 @@ class EntityLoader:
         with transaction.atomic():
             for name, fields in yaml_dict.items():
                 entity = Entity.objects.filter(name=name)
-                entity = Entity.objects.create(name=name, solution=solution) if not entity else entity
+                entity = Entity.objects.create(name=name, solution=solution) if not entity else entity[0]
                 entity_fields = self.create_fields(entity, fields)
                 if entity_fields:
                     Field.objects.bulk_create(entity_fields)
