@@ -13,7 +13,7 @@ rope = "*"
 requests = "*"
 
 [packages]
-djangorestframework = "==3.9.2"
+djangorestframework = "==3.11.2"
 drf-writable-nested = "==0.5.1"
 Django = "==2.2"
 psycopg2-binary = "*"
